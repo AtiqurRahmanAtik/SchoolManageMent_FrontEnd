@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {  useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import Swal from "sweetalert2";
 import { toast } from "react-toastify";
 import { Helmet } from "react-helmet";
@@ -14,7 +14,6 @@ const Login = () => {
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
 
-  
   const navigate = useNavigate();
   const { loginUser } = useAuth();
 
@@ -78,17 +77,12 @@ const Login = () => {
     }
   };
 
-
   // Password reset handler
   const handlePasswordReset = (e) => {
     e.preventDefault();
     setShowForgotModal(false);
     Swal.fire("Request Sent", "If an account exists, a reset link will be sent.", "success");
   };
-
-
-
-  // Jewellers
 
   return (
     <>
@@ -97,15 +91,12 @@ const Login = () => {
         <meta name="description" content="Login to your Kunjo Jewellers account." />
       </Helmet>
 
-    
-     {/* Main container - Full screen height */}
+      {/* Main container - Full screen height */}
       <div className="min-h-screen flex items-center justify-center p-4 bg-gray-50">
         
-       
         <div className="rounded-sm shadow-2xl overflow-hidden max-w-md w-full bg-white">
           
           <div className="w-full p-8 md:p-10 flex flex-col justify-center text-gray-800">
-            
             
             <h2 className="text-xl md:text-2xl font-serif text-center font-bold tracking-wide">Welcome Back</h2>
             <p className="text-center mb-8 text-gray-500 text-xs md:text-sm">Please enter your details to continue</p>
@@ -174,12 +165,21 @@ const Login = () => {
                 type="submit"
                 disabled={loading}
                 className={`w-full font-bold py-3 px-4 uppercase tracking-wider text-sm rounded-sm transition duration-300 ease-in-out
-                     bg-primary hover:bg-secondary text-white shadow-md
+                     bg-black hover:bg-gray-800 text-white shadow-md
                      ${loading ? "opacity-70 cursor-not-allowed" : ""}
                 `}
               >
                 {loading ? "Logging in..." : "Sign In"}
               </button>
+
+              {/* Add the Register Link Here */}
+              <div className="mt-6 text-center text-sm text-gray-600">
+                Don't have an account?{" "}
+                <Link to="/register" className="font-bold text-black hover:underline">
+                  Register
+                </Link>
+              </div>
+
             </form>
           </div>
 

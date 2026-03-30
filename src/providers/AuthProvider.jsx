@@ -6,10 +6,12 @@ import useAxiosPublic from "../Hook/useAxiosPublic";
 export const AuthContext = createContext();
 
 const AuthProvider = ({ children }) => {
+
   const [user, setUser] = useState(() => {
     const storedUser = localStorage.getItem("authUser");
     return storedUser ? JSON.parse(storedUser) : null;
   });
+
 
   const [loading, setLoading] = useState(false);
   const axiosSecure = useAxiosPublic();
@@ -20,16 +22,11 @@ const AuthProvider = ({ children }) => {
   });
 
   // Registration
-  const registerUser = async (email, password, name, branch) => {
+  // Registration in AuthProvider.jsx
+  const registerUser = async (userData) => {
     setLoading(true);
-
     try {
-      const { data } = await axiosSecure.post("/user/post", {
-        email,
-        password,
-        name,
-        branch,
-      });
+      const { data } = await axiosSecure.post("/user/post", userData);
       return data;
     } catch (error) {
       throw error;
@@ -40,13 +37,14 @@ const AuthProvider = ({ children }) => {
 
 
   // LoginUser
+ // LoginUser
   const loginUser = async (email, password) => {
     setLoading(true);
     try {
       const response = await axiosSecure.post("/user/login", { email, password });
       const data = response.data;
 
-      console.log("Login data : ", data)
+      console.log("Login data : ", data);
 
       setUser(data.user);
       setBranch(data.user.branch);
@@ -54,10 +52,12 @@ const AuthProvider = ({ children }) => {
       localStorage.setItem("authBranch", data.user.branch);
       localStorage.setItem("authToken", data.token);
 
-      localStorage.setItem()
+      // ❌ REMOVE THIS LINE: localStorage.setItem() 
       
       return data.user;
     } catch (error) {
+      // Log the actual error to the console so you know what really failed!
+      console.error("Actual Login Error:", error.response?.data || error);
       throw error;
     } finally {
       setLoading(false);
