@@ -1,107 +1,152 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
 
-
+// --- Layouts & Roots ---
 import Root from "./Root/Root";
 import PrivateRoot from "./Root/PrivateRoot";
-import Aroot from "./Root/Aroot";
+import Aroot from "./Root/Aroot"; // Dashboard Layout (Sidebar/Header)
 
-import Home from "../pages/Dashboard/Home";
+// --- Public Pages ---
 
 
-import Login from "../pages/Login/Login";
+// --- Dashboard Pages ---
+import Home from "../pages/Dashboard/Home"; // Main Dashboard view
+// (You will need to create the following components in your pages folder)
+import Students from "../pages/Students/Students";
+import Admissions from "../pages/Admissions/Admissions";
 import Error404 from "../pages/Error404/Error404";
-
-
-import NavHome from "../pages/NavHome/NavHome";
-
-
-
-
-
-
-
-import HomePage from "../pages/HomePage/HomePage";
-
+import Login from "../pages/Login/Login";
 import Register from "../pages/Register/Register";
-
-
-
+import NavHome from "../pages/NavHome/NavHome";
+import HomePage from "../pages/HomePage/HomePage";
+import Teachers from "../pages/Teachers/Teachers";
+import Staff from "../pages/Staff/Staff";
+import Classes from "../pages/Classes/Classes";
+import Subjects from "../pages/Subjects/Subjects";
+import Attendance from "../pages/Attendance/Attendance";
+import TeacherAttendance from "../pages/TeacherAttendance/TeacherAttendance";
+import StaffAttendance from "../pages/StaffAttendance/StaffAttendance";
+import Exams from "../pages/Exams/Exams";
+import Results from "../pages/Results/Results";
+import Routine from "../pages/Routine/Routine";
+import Salary from "../pages/Salary/Salary";
+import Notices from "../pages/Notices/Notices";
+import Calendar from "../pages/Calendar/Calendar";
+import Progress from "../pages/Progress/Progress";
+import AttendanceReport from "../pages/AttendanceReport/AttendanceReport";
 
 
 export const router = createBrowserRouter([
+  // ==========================================
+  // PUBLIC ROUTES (Website Front-End)
+  // ==========================================
   {
     path: "/",
     element: <Root />,
     errorElement: <Error404 />,
     children: [
-   
-  
-      // If you still need the Login page, you can add it on a separate path like this:
-      // 
       {
         path: "/login",
         element: <Login />,
       },
-      
       {
         path: "/register",
         element: <Register />,
       },
-      
-
-      // Navbar routes
-{
-    path: "/",
-    element: <NavHome />, // NavHome stays on the screen always
-    children: [
+      // Navbar routes (Home Page Wrapper)
       {
-        path: "/", // When the user is at the root URL
-        element: <HomePage />, // Show all the banners and sliders
+        path: "/",
+        element: <NavHome />, // NavHome stays on the screen always
+        children: [
+          {
+            path: "/", // When the user is at the root URL
+            element: <HomePage />, // Show all the banners and sliders
+          },
+        ],
       },
-    
-    ]
-  }
-,
-
-
-
-    
-
-
     ],
   },
 
-
-  // DashBoard 
+  // ==========================================
+  // PRIVATE ROUTES (Admin/School Dashboard)
+  // ==========================================
   {
     // Pathless layout route to wrap everything in Aroot (Sidebar/Header)
     element: <Aroot />,
     errorElement: <Error404 />,
     children: [
-      // --- Dashboard ---
       {
         path: "dashboard",
-        element: <PrivateRoot><Home/></PrivateRoot>,
+        element: <PrivateRoot><Home /></PrivateRoot>,
       },
-
-      
-     
-
-
-
-
-
-
-
-
-     
-     
-
-
-
-
-    
-      // --- Logout ---
+      {
+        path: "students",
+        element: <PrivateRoot><Students /></PrivateRoot>,
+      },
+      {
+        path: "admissions",
+        element: <PrivateRoot><Admissions /></PrivateRoot>,
+      },
+      {
+        path: "teachers",
+        element: <PrivateRoot><Teachers /></PrivateRoot>,
+      },
+      {
+        path: "staff",
+        element: <PrivateRoot><Staff /></PrivateRoot>,
+      },
+      {
+        path: "classes",
+        element: <PrivateRoot><Classes /></PrivateRoot>,
+      },
+      {
+        path: "subjects",
+        element: <PrivateRoot><Subjects /></PrivateRoot>,
+      },
+      {
+        path: "attendance",
+        element: <PrivateRoot><Attendance /></PrivateRoot>,
+      },
+      {
+        path: "teacher-attendance",
+        element: <PrivateRoot><TeacherAttendance /></PrivateRoot>,
+      },
+      {
+        path: "staff-attendance",
+        element: <PrivateRoot><StaffAttendance /></PrivateRoot>,
+      },
+      {
+        path: "attendance-report",
+        element: <PrivateRoot><AttendanceReport /></PrivateRoot>,
+      },
+      {
+        path: "exams",
+        element: <PrivateRoot><Exams /></PrivateRoot>,
+      },
+      {
+        path: "results",
+        element: <PrivateRoot><Results /></PrivateRoot>,
+      },
+      {
+        path: "routine",
+        element: <PrivateRoot><Routine /></PrivateRoot>,
+      },
+      {
+        path: "salary",
+        element: <PrivateRoot><Salary /></PrivateRoot>,
+      },
+      {
+        path: "notices",
+        element: <PrivateRoot><Notices /></PrivateRoot>,
+      },
+      {
+        path: "calendar",
+        element: <PrivateRoot><Calendar /></PrivateRoot>,
+      },
+      {
+        path: "progress",
+        element: <PrivateRoot><Progress /></PrivateRoot>,
+      },
+      // --- Logout Route ---
       {
         path: "logout",
         element: <PrivateRoot><Navigate to="/" replace /></PrivateRoot>,

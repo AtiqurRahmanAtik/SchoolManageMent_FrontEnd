@@ -9,7 +9,7 @@ module.exports = {
     extend: {
       colors: {
         primary: "#cd731c",
-        secondary: "#fdeecd",
+        secondary: "#28282B",
 
         // --- NEW Jewellery Brand Colors ---
         'jewel-gold': {

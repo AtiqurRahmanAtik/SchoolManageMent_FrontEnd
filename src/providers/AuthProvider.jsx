@@ -24,6 +24,7 @@ const AuthProvider = ({ children }) => {
   // Registration
   // Registration in AuthProvider.jsx
   const registerUser = async (userData) => {
+    console.log("Registering user with data:", userData);
     setLoading(true);
     try {
       const { data } = await axiosSecure.post("/user/post", userData);

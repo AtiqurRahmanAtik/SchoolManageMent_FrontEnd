@@ -150,7 +150,7 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, mode }) => {
                     
                     {isSidebarOpen && (
                         <div className="flex flex-col truncate">
-                            <span className="font-bold text-[15px] leading-tight text-white drop-shadow-sm">Jewellery Software</span>
+                            <span className="font-bold text-[15px] leading-tight text-white drop-shadow-sm"> School Manegment </span>
                             <span className="text-xs text-white/90 font-medium">Owner</span>
                         </div>
                     )}
