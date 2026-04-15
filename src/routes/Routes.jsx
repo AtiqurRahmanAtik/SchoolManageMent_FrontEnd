@@ -18,9 +18,9 @@ import Login from "../pages/Login/Login";
 import Register from "../pages/Register/Register";
 import NavHome from "../pages/NavHome/NavHome";
 import HomePage from "../pages/HomePage/HomePage";
-import Teachers from "../pages/Teachers/Teachers";
+
 import Staff from "../pages/Staff/Staff";
-import Classes from "../pages/Classes/Classes";
+
 import Subjects from "../pages/Subjects/Subjects";
 import Attendance from "../pages/Attendance/Attendance";
 import TeacherAttendance from "../pages/TeacherAttendance/TeacherAttendance";
@@ -33,6 +33,10 @@ import Notices from "../pages/Notices/Notices";
 import Calendar from "../pages/Calendar/Calendar";
 import Progress from "../pages/Progress/Progress";
 import AttendanceReport from "../pages/AttendanceReport/AttendanceReport";
+
+import Teachers from "../pages/Dashboard/Teachers";
+import Section from "../pages/Dashboard/Section";
+import Classes from "../pages/Dashboard/Classes";
 
 
 export const router = createBrowserRouter([
@@ -97,6 +101,10 @@ export const router = createBrowserRouter([
       {
         path: "classes",
         element: <PrivateRoot><Classes /></PrivateRoot>,
+      },
+      {
+        path: "section",
+        element: <PrivateRoot><Section /></PrivateRoot>,
       },
       {
         path: "subjects",

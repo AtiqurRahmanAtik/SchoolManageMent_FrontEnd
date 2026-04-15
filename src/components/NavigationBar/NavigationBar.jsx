@@ -267,7 +267,7 @@ const navItems = [
 
         
 
-      </nav>NavHome
+      </nav>
 
 
 

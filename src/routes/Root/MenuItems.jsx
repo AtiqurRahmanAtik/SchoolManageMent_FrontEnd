@@ -26,6 +26,7 @@ const useMenuItems = () => {
     { title: "Teachers", path: "/teachers", icon: <MdOutlineSchool className="text-xl" /> },
     { title: "Staff", path: "/staff", icon: <MdOutlineBadge className="text-xl" /> },
     { title: "Classes", path: "/classes", icon: <MdOutlineClass className="text-xl" /> },
+    { title: "Section", path: "/section", icon: <MdOutlineClass className="text-xl" /> },
     { title: "Subjects", path: "/subjects", icon: <MdOutlineMenuBook className="text-xl" /> },
     { title: "Attendance", path: "/attendance", icon: <MdOutlineFactCheck className="text-xl" /> },
     { title: "Teacher Attendance", path: "/teacher-attendance", icon: <MdOutlineFactCheck className="text-xl" /> },

@@ -1,5 +1,5 @@
 
-import { Outlet,  } from "react-router-dom";
+import { Outlet, useLocation,  } from "react-router-dom";
 
 import Footer from '../../components/Footer';
 import NavigationBar from "../../components/NavigationBar/NavigationBar";
@@ -8,6 +8,11 @@ import NavigationBar from "../../components/NavigationBar/NavigationBar";
 
 
 const Root = () => {
+
+
+    const location = useLocation().pathname === "/login" && useLocation.pathname ==="/register";
+
+    console.log("location ", location);
 
     
   
@@ -18,7 +23,7 @@ const Root = () => {
 
          
         <header>
-          <NavigationBar />
+       { location &&   <NavigationBar />}
           {/* <NavHome/> */}
           
         </header>
@@ -31,7 +36,7 @@ const Root = () => {
 
 
         <footer>
-            <Footer/>
+           {location && <Footer/>}
         </footer>
 
       
