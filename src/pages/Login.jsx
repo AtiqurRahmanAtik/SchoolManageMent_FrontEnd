@@ -3,7 +3,8 @@ import { useNavigate, Link } from "react-router-dom";
 import Swal from "sweetalert2";
 import { toast } from "react-toastify";
 import { Helmet } from "react-helmet";
-import useAuth from "../../Hook/useAuth";
+import useAuth from "../Hook/useAuth";
+
 
 const Login = () => {
   const [email, setEmail] = useState("");

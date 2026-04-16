@@ -149,8 +149,7 @@ export default function Classes() {
           <table className="table table-zebra w-full">
             <thead className="bg-base-200 text-base-content text-sm">
               <tr>
-                <th className="py-4 rounded-tl-box hidden md:table-cell">ID / Tag</th>
-                <th className="py-4">Class Details</th>
+                <th className="py-4 rounded-tl-box">Class Details</th>
                 <th className="py-4 text-right rounded-tr-box pr-8">Actions</th>
               </tr>
             </thead>
@@ -161,7 +160,7 @@ export default function Classes() {
                 <SkeletonLoader />
               ) : classes?.length === 0 ? (
                 <tr>
-                  <td colSpan="3" className="py-12 text-center">
+                  <td colSpan="2" className="py-12 text-center">
                     {/* Reused Custom Loading/Empty State Component */}
                     <MtableLoading data={classes} />
                     <div className="flex flex-col items-center justify-center text-base-content/50 mt-[-40px]">
@@ -174,11 +173,8 @@ export default function Classes() {
                   </td>
                 </tr>
               ) : (
-                classes?.map((cls, index) => (
+                classes?.map((cls) => (
                   <tr key={cls._id} className="hover">
-                    <td className="py-4 hidden md:table-cell text-base-content/50 font-mono text-sm">
-                      #{index + 1 + (currentPage - 1) * limitPerPage}
-                    </td>
                     <td className="py-4">
                       <div className="flex items-center space-x-3">
                         <div className="avatar placeholder">
@@ -188,7 +184,6 @@ export default function Classes() {
                         </div>
                         <div>
                           <div className="font-semibold text-base">{cls.className}</div>
-                      
                         </div>
                       </div>
                     </td>

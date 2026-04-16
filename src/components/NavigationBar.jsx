@@ -26,7 +26,7 @@ import { useEffect } from 'react';
 
 
 
-import navLogo from "../../assets/Logo/logo.svg";
+import navLogo from "../assets/Logo/logo.svg";
 
 
 

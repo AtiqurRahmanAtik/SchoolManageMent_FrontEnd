@@ -2,7 +2,8 @@ import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import Swal from "sweetalert2";
 import { toast } from "react-toastify";
-import useAuth from "../../Hook/useAuth"; // Adjust path if needed
+import useAuth from "../Hook/useAuth";
+// Adjust path if needed
 
 const Register = () => {
   const { registerUser } = useAuth();

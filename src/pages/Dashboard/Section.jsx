@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import  { useState, useEffect } from "react";
 import { useSection } from "../../Hook/useSection";
 import { useClass } from "../../Hook/useClass";
 import Pagination from "../../components/Pagination";
@@ -37,11 +37,10 @@ export default function Sections() {
   const [searchTerm, setSearchTerm] = useState("");
 
   // --- Dynamic Table Headers ---
-  // Added the "Class Name" column dynamically here
+  // Removed ID, ordered Class Name first, Section Name second
   const tableHeaders = [
-    { id: "id", label: "ID / Tag", className: "py-4 rounded-tl-box hidden md:table-cell" },
+    { id: "className", label: "Class Name", className: "py-4 rounded-tl-box" },
     { id: "sectionName", label: "Section Name", className: "py-4" },
-    { id: "className", label: "Class Name", className: "py-4 hidden sm:table-cell" },
     { id: "actions", label: "Actions", className: "py-4 text-right rounded-tr-box pr-8" }
   ];
 
@@ -210,12 +209,14 @@ export default function Sections() {
                   </td>
                 </tr>
               ) : (
-                sections?.map((section, index) => (
+                sections?.map((section) => (
                   <tr key={section._id} className="hover">
                     
-                    {/* ID Column */}
-                    <td className="py-4 hidden md:table-cell text-base-content/50 font-mono text-sm">
-                      #{index + 1 + (currentPage - 1) * limitPerPage}
+                    {/* Class Name Column */}
+                    <td className="py-4">
+                      <div className="badge badge-ghost font-medium">
+                        {getClassName(section)}
+                      </div>
                     </td>
 
                     {/* Section Name Column */}
@@ -229,13 +230,6 @@ export default function Sections() {
                         <div>
                           <div className="font-semibold text-base">{section.sectionName}</div>
                         </div>
-                      </div>
-                    </td>
-
-                    {/* Class Name Column (Dynamically Rendered) */}
-                    <td className="py-4 hidden sm:table-cell">
-                      <div className="badge badge-ghost font-medium">
-                        {getClassName(section)}
                       </div>
                     </td>
 

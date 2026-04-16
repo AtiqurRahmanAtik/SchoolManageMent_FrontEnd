@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import useTeachers from '../../Hook/useTeachers'; // Adjust path as needed
 import Pagination from '../../components/Pagination'; // Adjust path as needed
+import TableControls from '../../components/TableControls'; // Adjust path as needed
+import SkeletonLoader from '../../components/SkeletonLoader'; // Adjust path as needed
+import MtableLoading from '../../components library/MtableLoading'; // Adjust path as needed
+import Mtitle from '../../components library/Mtitle'; // Adjust path as needed
 
 export default function Teachers() {
-  
   const { 
     teachers, 
     pagination, 
@@ -16,8 +19,9 @@ export default function Teachers() {
     updateTeacher
   } = useTeachers();
 
-  // Local state for the "Show entries" dropdown
+  // Local state for the "Show entries" dropdown and Search
   const [limit, setLimit] = useState(10);
+  const [searchTerm, setSearchTerm] = useState('');
 
   // Form & Add/Edit Modal States
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -34,6 +38,15 @@ export default function Teachers() {
   // View Modal States
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [viewData, setViewData] = useState(null);
+
+  // --- Dynamic Table Headers ---
+  // ID column has been removed here
+  const tableHeaders = [
+    { id: "teacher", label: "Teacher Profile", className: "py-4 rounded-tl-box" },
+    { id: "subject", label: "Subject", className: "py-4 hidden sm:table-cell" },
+    { id: "contact", label: "Contact Info", className: "py-4 hidden md:table-cell" },
+    { id: "actions", label: "Actions", className: "py-4 text-right rounded-tr-box pr-8" }
+  ];
 
   // Fetch teachers on component mount or when limit changes
   useEffect(() => {
@@ -53,6 +66,11 @@ export default function Teachers() {
   const handleLimitChange = (e) => {
     const newLimit = parseInt(e.target.value, 10);
     setLimit(newLimit);
+  };
+
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+    // Add logic here if you want to trigger a search API call based on the term
   };
 
   const handleInputChange = (e) => {
@@ -133,290 +151,348 @@ export default function Teachers() {
   };
   
   return (
-    <div className="p-6 max-w-7xl mx-auto bg-gray-50 min-h-screen relative">
+    <div className="p-4 md:p-8 max-w-7xl mx-auto">
       
-      {/* Top Header Section */}
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Teachers Management</h1>
-        <button 
-          onClick={() => {
-            resetForm();
-            setIsModalOpen(true);
-          }}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded shadow transition"
-        >
-          + Add Teacher
-        </button>
-      </div>
+      {/* Header Section */}
+      <Mtitle 
+        title="Teachers Management"
+        middlecontent={
+          <span className="text-sm text-base-content/70 hidden md:inline-block">
+            Manage and organize your teaching staff efficiently
+          </span>
+        }
+        rightcontent={
+          <button 
+            onClick={() => {
+              resetForm();
+              setIsModalOpen(true);
+            }}
+            className="btn btn-primary shadow-sm"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+            </svg>
+            Add New Teacher
+          </button>
+        }
+      />
 
-      {/* Error Message */}
+      {/* Error Alert */}
       {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
-          {error}
+        <div className="alert alert-error shadow-lg mb-6">
+          <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current flex-shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span>{error}</span>
         </div>
       )}
 
-      {/* Main Content Card */}
-      <div className="bg-white shadow-md rounded-lg overflow-hidden border border-gray-100">
-        
-        {loading && teachers.length === 0 ? (
-          <div className="text-center py-10 text-gray-500 text-lg">Loading Teachers...</div>
-        ) : (
-          <>
-            <div className="overflow-x-auto">
-              <table className="min-w-full leading-normal">
-                <thead>
-                  <tr>
-                    <th className="px-6 py-4 border-b border-gray-200 bg-gray-50 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                      Photo
-                    </th>
-                    <th className="px-6 py-4 border-b border-gray-200 bg-gray-50 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                      Name
-                    </th>
-                    <th className="px-6 py-4 border-b border-gray-200 bg-gray-50 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                      Subject
-                    </th>
-                    <th className="px-6 py-4 border-b border-gray-200 bg-gray-50 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                      Contact
-                    </th>
-                    <th className="px-6 py-4 border-b border-gray-200 bg-gray-50 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {teachers.length > 0 ? (
-                    teachers.map((teacher) => (
-                      <tr key={teacher._id} className="hover:bg-gray-50 transition">
-                        <td className="px-6 py-4 border-b border-gray-100 bg-white text-sm">
-                          <img 
-                            src={teacher.teacherPhoto} 
-                            alt={teacher.teacherName} 
-                            className="w-10 h-10 rounded-full object-cover"
-                            onError={(e) => { e.target.src = 'https://via.placeholder.com/40'; }}
-                          />
-                        </td>
-                        <td className="px-6 py-4 border-b border-gray-100 bg-white text-sm">
-                          <p className="text-gray-900 font-medium">{teacher.teacherName}</p>
-                        </td>
-                        <td className="px-6 py-4 border-b border-gray-100 bg-white text-sm">
-                          <p className="text-gray-700">{teacher.subject}</p>
-                        </td>
-                        <td className="px-6 py-4 border-b border-gray-100 bg-white text-sm">
-                          <p className="text-gray-900">{teacher.phoneNumber}</p>
-                          <p className="text-gray-500 text-xs">{teacher.email}</p>
-                        </td>
-                        <td className="px-6 py-4 border-b border-gray-100 bg-white text-sm text-center space-x-4">
-                          <button 
-                            className="text-green-500 hover:text-green-700 font-medium"
-                            onClick={() => handleViewClick(teacher._id)}
-                          >
-                            View
-                          </button>
-                          <button 
-                            className="text-blue-500 hover:text-blue-700 font-medium"
-                            onClick={() => handleEditClick(teacher._id)}
-                          >
-                            Edit
-                          </button>
-                          <button 
-                            className="text-red-500 hover:text-red-700 font-medium"
-                            onClick={() => handleDelete(teacher._id)}
-                          >
-                            Delete
-                          </button>
-                        </td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan="5" className="px-6 py-10 bg-white text-sm text-center text-gray-500">
-                        No teachers found.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Bottom Bar: Limit Dropdown & Pagination */}
-            <div className="px-6 py-4 border-t border-gray-200 bg-white flex flex-col md:flex-row items-center justify-between gap-4">
-              <div className="flex items-center text-sm text-gray-700 font-medium">
-                <span className="mr-2">Show:</span>
-                <select 
-                  value={limit}
-                  onChange={handleLimitChange}
-                  className="border border-gray-300 rounded px-2 py-1 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer"
-                >
-                  <option value={10}>10</option>
-                  <option value={20}>20</option>
-                  <option value={50}>50</option>
-                </select>
-              </div>
-
-              <Pagination 
-                currentPage={pagination?.currentPage || 1}
-                totalPages={pagination?.totalPages || 1}
-                totalItems={pagination?.totalItems || 0}
-                itemsPerPage={pagination?.itemsPerPage || limit}
-                onPageChange={handlePageChange}
-              />
-            </div>
-          </>
-        )}
+      {/* Table Controls (Search & Limit) */}
+      <div className="bg-base-100 p-4 rounded-xl shadow-sm border border-base-200 mb-6">
+        <TableControls 
+          itemsPerPage={limit}
+          onItemsPerPageChange={handleLimitChange}
+          searchTerm={searchTerm}
+          onSearchChange={handleSearchChange}
+        />
       </div>
 
-      {/* Add / Edit Teacher Modal */}
-      {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-md overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h2 className="text-xl font-semibold text-gray-800">
-                {editId ? 'Edit Teacher' : 'Add New Teacher'}
-              </h2>
-            </div>
+      {/* Main Table Card */}
+      <div className="card bg-base-100 shadow-xl border border-base-200">
+        <div className="overflow-x-auto rounded-box">
+          <table className="table table-zebra w-full">
+            <thead className="bg-base-200 text-base-content text-sm">
+              <tr>
+                {tableHeaders.map((header) => (
+                  <th key={header.id} className={header.className}>
+                    {header.label}
+                  </th>
+                ))}
+              </tr>
+            </thead>
             
-            <form onSubmit={handleSubmit} className="p-6">
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-                  <input 
-                    type="text" 
-                    name="teacherName"
-                    value={formData.teacherName}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="e.g. John Doe"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Subject</label>
-                  <input 
-                    type="text" 
-                    name="subject"
-                    value={formData.subject}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="e.g. Mathematics"
-                  />
-                </div>
+            <tbody>
+              {loading ? (
+                <SkeletonLoader />
+              ) : teachers?.length === 0 ? (
+                <tr>
+                  <td colSpan={tableHeaders.length} className="py-12 text-center">
+                    <MtableLoading data={teachers} />
+                    <div className="flex flex-col items-center justify-center text-base-content/50 mt-[-40px]">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                      </svg>
+                      <p className="text-lg font-medium">No teachers found</p>
+                      <p className="text-sm">Click "Add New Teacher" to create one.</p>
+                    </div>
+                  </td>
+                </tr>
+              ) : (
+                teachers?.map((teacher) => (
+                  <tr key={teacher._id} className="hover">
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-                  <input 
-                    type="tel" 
-                    name="phoneNumber"
-                    value={formData.phoneNumber}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="e.g. +1 234 567 8900"
-                  />
-                </div>
+                    {/* Teacher Profile Column */}
+                    <td className="py-4">
+                      <div className="flex items-center space-x-3">
+                        <div className="avatar">
+                          <div className="mask mask-squircle w-10 h-10 bg-base-200">
+                            <img 
+                              src={teacher.teacherPhoto} 
+                              alt={teacher.teacherName} 
+                              onError={(e) => { e.target.src = 'https://via.placeholder.com/40'; }}
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <div className="font-semibold text-base">{teacher.teacherName}</div>
+                        </div>
+                      </div>
+                    </td>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
-                  <input 
-                    type="email" 
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="e.g. john@school.edu"
-                  />
-                </div>
+                    {/* Subject Column */}
+                    <td className="py-4 hidden sm:table-cell">
+                      <div className="badge badge-ghost font-medium">
+                        {teacher.subject}
+                      </div>
+                    </td>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Photo URL</label>
-                  <input 
-                    type="url" 
-                    name="teacherPhoto"
-                    value={formData.teacherPhoto}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="https://example.com/photo.jpg"
-                  />
-                </div>
-              </div>
+                    {/* Contact Column */}
+                    <td className="py-4 hidden md:table-cell">
+                      <div className="text-sm font-medium">{teacher.phoneNumber}</div>
+                      <div className="text-xs text-base-content/60">{teacher.email}</div>
+                    </td>
 
-              <div className="mt-6 flex justify-end gap-3">
-                <button 
-                  type="button" 
-                  onClick={resetForm}
-                  disabled={isSubmitting}
-                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 font-medium transition disabled:opacity-50"
-                >
-                  Cancel
-                </button>
-                <button 
-                  type="submit" 
-                  disabled={isSubmitting}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium transition disabled:opacity-50 flex items-center"
-                >
-                  {isSubmitting ? 'Saving...' : (editId ? 'Update Teacher' : 'Save Teacher')}
-                </button>
-              </div>
-            </form>
+                    {/* Actions Column */}
+                    <td className="py-4 text-right pr-6">
+                      <div className="join justify-end">
+                        <button 
+                          onClick={() => handleViewClick(teacher._id)}
+                          className="btn btn-sm btn-ghost text-success join-item"
+                          title="View Details"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                          </svg>
+                          <span className="hidden sm:inline ml-1">View</span>
+                        </button>
+                        <button 
+                          onClick={() => handleEditClick(teacher._id)}
+                          className="btn btn-sm btn-ghost text-info join-item"
+                          title="Edit Teacher"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                          </svg>
+                          <span className="hidden sm:inline ml-1">Edit</span>
+                        </button>
+                        <button 
+                          onClick={() => handleDelete(teacher._id)}
+                          className="btn btn-sm btn-ghost text-error join-item"
+                          title="Delete Teacher"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                          <span className="hidden sm:inline ml-1">Delete</span>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Pagination Container */}
+      {pagination && pagination.totalPages > 1 && (
+        <div className="flex justify-center md:justify-end mt-6">
+          <div className="join shadow-sm border border-base-200 rounded-lg bg-base-100">
+            <Pagination 
+              currentPage={pagination?.currentPage || 1}
+              totalPages={pagination?.totalPages || 1}
+              totalItems={pagination?.totalItems || 0}
+              itemsPerPage={pagination?.itemsPerPage || limit}
+              onPageChange={handlePageChange}
+            />
           </div>
         </div>
       )}
 
-      {/* View Single Teacher Modal */}
-      {isViewModalOpen && viewData && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-md overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-              <h2 className="text-xl font-semibold text-gray-800">Teacher Profile</h2>
+      {/* Add / Edit Teacher DaisyUI Modal */}
+      <div className={`modal ${isModalOpen ? "modal-open" : ""}`} style={{ zIndex: 999 }}>
+        <div className="modal-box">
+          <button onClick={resetForm} className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">
+            ✕
+          </button>
+          
+          <h3 className="font-bold text-xl mb-4 border-b border-base-200 pb-2">
+            {editId ? 'Edit Teacher Details' : 'Create New Teacher'}
+          </h3>
+
+          <form onSubmit={handleSubmit} className="py-2 space-y-3">
+            
+            <div className="form-control w-full">
+              <label className="label">
+                <span className="label-text font-semibold text-base-content">Full Name</span>
+              </label>
+              <input 
+                type="text" 
+                name="teacherName"
+                value={formData.teacherName}
+                onChange={handleInputChange}
+                required
+                className="input input-bordered w-full focus:input-primary"
+                placeholder="e.g. John Doe"
+              />
+            </div>
+            
+            <div className="form-control w-full">
+              <label className="label">
+                <span className="label-text font-semibold text-base-content">Subject</span>
+              </label>
+              <input 
+                type="text" 
+                name="subject"
+                value={formData.subject}
+                onChange={handleInputChange}
+                required
+                className="input input-bordered w-full focus:input-primary"
+                placeholder="e.g. Mathematics"
+              />
+            </div>
+
+            <div className="form-control w-full">
+              <label className="label">
+                <span className="label-text font-semibold text-base-content">Phone Number</span>
+              </label>
+              <input 
+                type="tel" 
+                name="phoneNumber"
+                value={formData.phoneNumber}
+                onChange={handleInputChange}
+                required
+                className="input input-bordered w-full focus:input-primary"
+                placeholder="e.g. +1 234 567 8900"
+              />
+            </div>
+
+            <div className="form-control w-full">
+              <label className="label">
+                <span className="label-text font-semibold text-base-content">Email Address</span>
+              </label>
+              <input 
+                type="email" 
+                name="email"
+                value={formData.email}
+                onChange={handleInputChange}
+                required
+                className="input input-bordered w-full focus:input-primary"
+                placeholder="e.g. john@school.edu"
+              />
+            </div>
+
+            <div className="form-control w-full">
+              <label className="label">
+                <span className="label-text font-semibold text-base-content">Photo URL</span>
+              </label>
+              <input 
+                type="url" 
+                name="teacherPhoto"
+                value={formData.teacherPhoto}
+                onChange={handleInputChange}
+                required
+                className="input input-bordered w-full focus:input-primary"
+                placeholder="https://example.com/photo.jpg"
+              />
+            </div>
+
+            <div className="modal-action mt-6">
               <button 
-                onClick={() => setIsViewModalOpen(false)}
-                className="text-gray-400 hover:text-gray-600 text-2xl font-bold leading-none"
+                type="button" 
+                onClick={resetForm}
+                disabled={isSubmitting}
+                className="btn btn-ghost"
               >
-                &times;
+                Cancel
+              </button>
+              <button 
+                type="submit" 
+                disabled={isSubmitting}
+                className="btn btn-primary min-w-[120px]"
+              >
+                {isSubmitting ? <span className="loading loading-spinner loading-sm"></span> : (editId ? 'Update Teacher' : 'Save Teacher')}
               </button>
             </div>
-            
-            <div className="p-6 flex flex-col items-center">
-              <img 
-                src={viewData.teacherPhoto} 
-                alt={viewData.teacherName} 
-                className="w-32 h-32 rounded-full object-cover shadow-sm mb-4 border-4 border-gray-50"
-                onError={(e) => { e.target.src = 'https://via.placeholder.com/150'; }}
-              />
-              <h3 className="text-2xl font-bold text-gray-900 mb-1">{viewData.teacherName}</h3>
-              <p className="text-blue-600 font-medium mb-4">{viewData.subject}</p>
+          </form>
+        </div>
+        
+        {/* Click outside to close */}
+        <div className="modal-backdrop" onClick={resetForm}>
+          <button className="cursor-default">close</button>
+        </div>
+      </div>
+
+      {/* View Single Teacher DaisyUI Modal */}
+      <div className={`modal ${isViewModalOpen ? "modal-open" : ""}`} style={{ zIndex: 999 }}>
+        <div className="modal-box">
+          <button onClick={() => setIsViewModalOpen(false)} className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">
+            ✕
+          </button>
+          
+          <h3 className="font-bold text-xl mb-4 border-b border-base-200 pb-2">
+            Teacher Profile
+          </h3>
+          
+          {viewData && (
+            <div className="flex flex-col items-center py-4">
+              <div className="avatar mb-4">
+                <div className="w-32 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
+                  <img 
+                    src={viewData.teacherPhoto} 
+                    alt={viewData.teacherName} 
+                    onError={(e) => { e.target.src = 'https://via.placeholder.com/150'; }}
+                  />
+                </div>
+              </div>
               
-              <div className="w-full bg-gray-50 rounded-md p-4 space-y-3">
+              <h3 className="text-2xl font-bold text-base-content mb-1">{viewData.teacherName}</h3>
+              <div className="badge badge-primary badge-outline font-medium mb-6 px-4 py-3">{viewData.subject}</div>
+              
+              <div className="w-full bg-base-200 rounded-xl p-5 space-y-3">
                 <div className="flex items-center">
-                  <span className="font-semibold text-gray-600 w-24">Email:</span>
-                  <span className="text-gray-800">{viewData.email}</span>
+                  <span className="font-semibold text-base-content/70 w-24">Email:</span>
+                  <span className="text-base-content">{viewData.email}</span>
                 </div>
                 <div className="flex items-center">
-                  <span className="font-semibold text-gray-600 w-24">Phone:</span>
-                  <span className="text-gray-800">{viewData.phoneNumber}</span>
+                  <span className="font-semibold text-base-content/70 w-24">Phone:</span>
+                  <span className="text-base-content">{viewData.phoneNumber}</span>
                 </div>
                 <div className="flex items-center">
-                  <span className="font-semibold text-gray-600 w-24">Branch:</span>
-                  <span className="text-gray-800">{viewData.branch || 'N/A'}</span>
+                  <span className="font-semibold text-base-content/70 w-24">Branch:</span>
+                  <span className="text-base-content">{viewData.branch || 'N/A'}</span>
                 </div>
               </div>
             </div>
+          )}
 
-            <div className="bg-gray-50 px-6 py-4 border-t border-gray-200 flex justify-end">
-               <button 
-                  onClick={() => setIsViewModalOpen(false)}
-                  className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 font-medium transition"
-                >
-                  Close
-                </button>
-            </div>
+          <div className="modal-action border-t border-base-200 pt-4 mt-2">
+             <button 
+                onClick={() => setIsViewModalOpen(false)}
+                className="btn btn-neutral"
+              >
+                Close
+              </button>
           </div>
         </div>
-      )}
+
+        {/* Click outside to close */}
+        <div className="modal-backdrop" onClick={() => setIsViewModalOpen(false)}>
+          <button className="cursor-default">close</button>
+        </div>
+      </div>
 
     </div>
   );

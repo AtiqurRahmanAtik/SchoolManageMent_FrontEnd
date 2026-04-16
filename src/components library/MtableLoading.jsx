@@ -1,6 +1,8 @@
 import { ColorRing } from "react-loader-spinner";
 
 const MtableLoading = ({ data }) => {
+
+  
   return (
     <div>
       {data ? (

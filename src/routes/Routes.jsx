@@ -11,32 +11,44 @@ import Aroot from "./Root/Aroot"; // Dashboard Layout (Sidebar/Header)
 // --- Dashboard Pages ---
 import Home from "../pages/Dashboard/Home"; // Main Dashboard view
 // (You will need to create the following components in your pages folder)
-import Students from "../pages/Students/Students";
-import Admissions from "../pages/Admissions/Admissions";
-import Error404 from "../pages/Error404/Error404";
-import Login from "../pages/Login/Login";
-import Register from "../pages/Register/Register";
-import NavHome from "../pages/NavHome/NavHome";
-import HomePage from "../pages/HomePage/HomePage";
 
-import Staff from "../pages/Staff/Staff";
 
-import Subjects from "../pages/Subjects/Subjects";
-import Attendance from "../pages/Attendance/Attendance";
-import TeacherAttendance from "../pages/TeacherAttendance/TeacherAttendance";
-import StaffAttendance from "../pages/StaffAttendance/StaffAttendance";
-import Exams from "../pages/Exams/Exams";
-import Results from "../pages/Results/Results";
-import Routine from "../pages/Routine/Routine";
-import Salary from "../pages/Salary/Salary";
-import Notices from "../pages/Notices/Notices";
-import Calendar from "../pages/Calendar/Calendar";
-import Progress from "../pages/Progress/Progress";
-import AttendanceReport from "../pages/AttendanceReport/AttendanceReport";
+
+
+
+
+
+
+
+
+
+
 
 import Teachers from "../pages/Dashboard/Teachers";
 import Section from "../pages/Dashboard/Section";
 import Classes from "../pages/Dashboard/Classes";
+import Admissions from "../pages/Dashboard/Admissions";
+import AttendanceReport from "../pages/Dashboard/AttendanceReport";
+import Attendance from "../pages/Dashboard/Attendance";
+import Calendar from "../pages/Dashboard/Calendar";
+import Staff from "../pages/Dashboard/Staff";
+import Subjects from "../pages/Dashboard/Subjects";
+import TeacherAttendance from "../pages/Dashboard/TeacherAttendance";
+import StaffAttendance from "../pages/Dashboard/StaffAttendance";
+import Exams from "../pages/Dashboard/Exams";
+import Results from "../pages/Dashboard/Results";
+import Routine from "../pages/Dashboard/Routine";
+import Salary from "../pages/Dashboard/Salary";
+import Notices from "../pages/Dashboard/Notices";
+import Progress from "../pages/Dashboard/Progress";
+import Students from "../pages/Dashboard/Students";
+import Login from "../pages/Login";
+import Register from "../pages/Register";
+
+import HomePage from "../pages/HomePage";
+import Error404 from "../pages/Error404";
+import NavHome from "../pages/NavHome";
+
 
 
 export const router = createBrowserRouter([
