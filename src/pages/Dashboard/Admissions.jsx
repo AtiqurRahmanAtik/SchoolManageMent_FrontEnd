@@ -8,7 +8,7 @@ import 'react-toastify/dist/ReactToastify.css';
 const AdmissionField = ({ label, name, type = 'text', value, onChange, placeholder, required = false, options = [], colSpan = 1 }) => {
   return (
     <div className={`col-span-${colSpan} flex flex-col`}>
-      <label htmlFor={name} className="block text-sm font-semibold text-gray-700 mb-1.5 ml-1">
+      <label htmlFor={name} className="block text-sm font-medium text-gray-700 mb-1">
         {label} {required && <span className="text-red-500">*</span>}
       </label>
       
@@ -20,7 +20,7 @@ const AdmissionField = ({ label, name, type = 'text', value, onChange, placehold
             value={value}
             onChange={onChange}
             required={required}
-            className="w-full appearance-none rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-gray-700 transition-all duration-200 focus:bg-white focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 shadow-sm"
+            className="w-full appearance-none rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 transition-colors duration-200 focus:border-[#66cc00] focus:outline-none focus:ring-2 focus:ring-[#66cc00]/20 shadow-sm"
           >
             <option value="" disabled>{placeholder || 'Select...'}</option>
             {options.map((opt, idx) => (
@@ -28,7 +28,7 @@ const AdmissionField = ({ label, name, type = 'text', value, onChange, placehold
             ))}
           </select>
           {/* Custom Select Dropdown Arrow */}
-          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-500">
+          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
             <svg className="h-4 w-4 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
           </div>
         </div>
@@ -41,7 +41,7 @@ const AdmissionField = ({ label, name, type = 'text', value, onChange, placehold
           onChange={onChange}
           placeholder={placeholder}
           required={required}
-          className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-gray-700 transition-all duration-200 focus:bg-white focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 shadow-sm placeholder:text-gray-400"
+          className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 transition-colors duration-200 focus:border-[#66cc00] focus:outline-none focus:ring-2 focus:ring-[#66cc00]/20 shadow-sm placeholder:text-gray-400"
         />
       )}
     </div>
@@ -141,35 +141,35 @@ export default function Admissions() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-indigo-50 py-10 px-4 sm:px-6 lg:px-8 font-sans">
+    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8 font-sans">
       <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} />
       
-      <div className="max-w-7xl mx-auto bg-white p-8 md:p-12 rounded-3xl shadow-xl border border-white/60">
+      <div className="max-w-7xl mx-auto bg-white p-6 md:p-10 rounded-lg shadow border border-gray-200">
         
         {/* Form Header */}
-        <div className="text-center mb-10">
-          <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 mb-2">
-            Admission Form
+        <div className="mb-8 border-b border-gray-200 pb-5">
+          <h1 className="text-2xl font-bold text-gray-900 mb-1">
+            Student Admission Form
           </h1>
-          <p className="text-gray-500 font-medium">Please fill out all the necessary information carefully.</p>
+          <p className="text-sm text-gray-500">Enter the details below to enroll a new student into the system.</p>
         </div>
 
         {error && (
-          <div className="mb-8 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-r-lg shadow-sm">
+          <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-600 text-red-700 rounded-r-md shadow-sm text-sm">
             <p className="font-semibold">Submission Error</p>
             <p>{error}</p>
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-12">
+        <form onSubmit={handleSubmit} className="space-y-10">
           
           {/* Section 1: Student Information */}
-          <section className="bg-white rounded-2xl p-6 shadow-[0_0_15px_rgba(0,0,0,0.03)] border border-gray-100">
-            <div className="flex items-center mb-6 border-b border-gray-100 pb-4">
-              <span className="bg-indigo-600 text-white rounded-lg w-10 h-10 flex items-center justify-center mr-4 text-xl font-bold shadow-md">1</span>
-              <h2 className="text-2xl font-bold text-gray-800 tracking-tight">Student Information</h2>
+          <section>
+            <div className="flex items-center mb-5">
+              <span className="bg-[#66cc00] text-white rounded-full w-7 h-7 flex items-center justify-center mr-3 text-sm font-bold">1</span>
+              <h2 className="text-lg font-semibold text-gray-800">Student Information</h2>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-6">
+            <div className="bg-gray-50/50 p-5 rounded-md border border-gray-100 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-5">
               <AdmissionField label="Student Name" name="studentName" value={formData.studentName} onChange={handleChange} placeholder="Full Name" required />
               <AdmissionField label="Registration No" name="registrationNo" value={formData.registrationNo} onChange={handleChange} placeholder="E.g. REG-2026" required />
               
@@ -202,12 +202,12 @@ export default function Admissions() {
           </section>
 
           {/* Section 2: Other Information */}
-          <section className="bg-white rounded-2xl p-6 shadow-[0_0_15px_rgba(0,0,0,0.03)] border border-gray-100">
-            <div className="flex items-center mb-6 border-b border-gray-100 pb-4">
-              <span className="bg-indigo-600 text-white rounded-lg w-10 h-10 flex items-center justify-center mr-4 text-xl font-bold shadow-md">2</span>
-              <h2 className="text-2xl font-bold text-gray-800 tracking-tight">Other Information</h2>
+          <section>
+            <div className="flex items-center mb-5">
+              <span className="bg-[#66cc00] text-white rounded-full w-7 h-7 flex items-center justify-center mr-3 text-sm font-bold">2</span>
+              <h2 className="text-lg font-semibold text-gray-800">Other Information</h2>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-6">
+            <div className="bg-gray-50/50 p-5 rounded-md border border-gray-100 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-5">
               <AdmissionField label="Date Of Birth" name="dateOfBirth" type="date" value={formData.dateOfBirth} onChange={handleChange} required />
               <AdmissionField label="Student Birth Form ID / NIC" name="studentBirthFormId" value={formData.studentBirthFormId} onChange={handleChange} placeholder="ID Number" required />
               
@@ -222,20 +222,19 @@ export default function Admissions() {
               <div className="md:col-span-2">
                 <AdmissionField label="Any Additional Note (or N/A)" name="additionalNote" value={formData.additionalNote} onChange={handleChange} placeholder="Special instructions or enter N/A" required />
               </div>
-            </div>
-            
-            <div className="mt-8 pt-6 border-t border-gray-100">
-              <AdmissionField label="Full Address" name="address" value={formData.address} onChange={handleChange} placeholder="Street, City, State, Zip" required />
+              <div className="md:col-span-3 border-t border-gray-200 mt-2 pt-5">
+                <AdmissionField label="Full Address" name="address" value={formData.address} onChange={handleChange} placeholder="Street, City, State, Zip" required />
+              </div>
             </div>
           </section>
 
           {/* Section 3: Father/Guardian Information */}
-          <section className="bg-white rounded-2xl p-6 shadow-[0_0_15px_rgba(0,0,0,0.03)] border border-gray-100">
-            <div className="flex items-center mb-6 border-b border-gray-100 pb-4">
-              <span className="bg-indigo-600 text-white rounded-lg w-10 h-10 flex items-center justify-center mr-4 text-xl font-bold shadow-md">3</span>
-              <h2 className="text-2xl font-bold text-gray-800 tracking-tight">Father/Guardian Info</h2>
+          <section>
+            <div className="flex items-center mb-5">
+              <span className="bg-[#66cc00] text-white rounded-full w-7 h-7 flex items-center justify-center mr-3 text-sm font-bold">3</span>
+              <h2 className="text-lg font-semibold text-gray-800">Father / Guardian Info</h2>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-6">
+            <div className="bg-gray-50/50 p-5 rounded-md border border-gray-100 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-5">
               <AdmissionField label="Father Name" name="fatherName" value={formData.fatherName} onChange={handleChange} placeholder="Full Name" required />
               <AdmissionField label="National ID" name="fatherNationalId" value={formData.fatherNationalId} onChange={handleChange} placeholder="National ID" required />
               <AdmissionField label="Occupation" name="fatherOccupation" value={formData.fatherOccupation} onChange={handleChange} placeholder="Job Title" required />
@@ -247,12 +246,12 @@ export default function Admissions() {
           </section>
 
           {/* Section 4: Mother Information */}
-          <section className="bg-white rounded-2xl p-6 shadow-[0_0_15px_rgba(0,0,0,0.03)] border border-gray-100">
-            <div className="flex items-center mb-6 border-b border-gray-100 pb-4">
-              <span className="bg-indigo-600 text-white rounded-lg w-10 h-10 flex items-center justify-center mr-4 text-xl font-bold shadow-md">4</span>
-              <h2 className="text-2xl font-bold text-gray-800 tracking-tight">Mother Information</h2>
+          <section>
+            <div className="flex items-center mb-5">
+              <span className="bg-[#66cc00] text-white rounded-full w-7 h-7 flex items-center justify-center mr-3 text-sm font-bold">4</span>
+              <h2 className="text-lg font-semibold text-gray-800">Mother Information</h2>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-6">
+            <div className="bg-gray-50/50 p-5 rounded-md border border-gray-100 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-5">
               <AdmissionField label="Mother Name" name="motherName" value={formData.motherName} onChange={handleChange} placeholder="Full Name" required />
               <AdmissionField label="National ID" name="motherNationalId" value={formData.motherNationalId} onChange={handleChange} placeholder="National ID" required />
               <AdmissionField label="Occupation" name="motherOccupation" value={formData.motherOccupation} onChange={handleChange} placeholder="Job Title" required />
@@ -264,31 +263,30 @@ export default function Admissions() {
           </section>
 
           {/* Footer Actions */}
-          <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mt-12 pt-8 border-t border-gray-200">
+          <div className="flex flex-col-reverse sm:flex-row justify-end items-center gap-3 pt-6 border-t border-gray-200">
             <button 
               type="button" 
               onClick={handleReset}
-              className="w-full sm:w-auto px-8 py-3.5 rounded-xl font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 shadow-sm transition-all duration-200 flex items-center justify-center"
+              className="w-full sm:w-auto px-6 py-2.5 rounded-md text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 shadow-sm transition-colors duration-200 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#66cc00]"
             >
-              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
               Reset Form
             </button>
             <button 
               type="submit" 
               disabled={loading}
-              className="w-full sm:w-auto px-10 py-3.5 rounded-xl font-bold text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-lg shadow-indigo-200 transition-all duration-200 flex items-center justify-center transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+              className="w-full sm:w-auto px-6 py-2.5 rounded-md text-sm font-medium text-white bg-[#66cc00] hover:bg-[#5bb800] shadow-sm transition-colors duration-200 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#66cc00] disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {loading ? (
                 <span className="flex items-center">
-                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
-                  Submitting...
+                  Saving...
                 </span>
               ) : (
                 <>
-                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
+                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
                   Submit Admission
                 </>
               )}

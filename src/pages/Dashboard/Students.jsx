@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import useStudents from '../../Hook/useStudents'; // Adjust the import path as needed
+import useStudents from '../../Hook/useStudents'; 
+import useSection from '../../Hook/useSection'; // NEW: Import useSection hook
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Link } from 'react-router-dom';
@@ -12,6 +13,7 @@ import SkeletonLoader from '../../components/SkeletonLoader';
 import MtableLoading from '../../components library/MtableLoading'; 
 
 export default function Students() {
+  // --- Student Hook ---
   const {
     students,
     pagination,
@@ -23,11 +25,14 @@ export default function Students() {
     updateStudent
   } = useStudents();
 
+  // --- Section Hook (NEW) ---
+  const { sections, getSections } = useSection();
+
   // Local state for table controls
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState(""); // NEW: Debounce state
+  const [debouncedSearch, setDebouncedSearch] = useState(""); 
 
   // Edit Modal States
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -47,33 +52,44 @@ export default function Students() {
   // --- Dynamic Table Headers ---
   const tableHeaders = [
     { id: "student", label: "Student Profile", className: "py-4 rounded-tl-box" },
-    { id: "registration", label: "Registration", className: "py-4 hidden sm:table-cell" },
+    { id: "registration", label: "Registration No", className: "py-4 hidden sm:table-cell" },
     { id: "classInfo", label: "Class & Section", className: "py-4 hidden md:table-cell" },
     { id: "contact", label: "Contact Info", className: "py-4 hidden lg:table-cell" },
     { id: "actions", label: "Actions", className: "py-4 text-right rounded-tr-box pr-8" }
   ];
 
-  // UPDATE: Debounce the search term to prevent API spamming
+  // Fetch sections for the dropdowns on component mount
+  useEffect(() => {
+    // Fetch a large limit to ensure all sections/classes populate the dropdown
+    getSections(1, 1000); 
+  }, [getSections]);
+
+  // Debounce the search term
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearch(searchTerm);
-      if (searchTerm) setCurrentPage(1); // Reset to page 1 when a new search triggers
-    }, 500); // 500ms delay
+      if (searchTerm) setCurrentPage(1); 
+    }, 500); 
 
-    return () => {
-      clearTimeout(handler);
-    };
+    return () => clearTimeout(handler);
   }, [searchTerm]);
 
-  // UPDATE: Fetch students when component mounts, page/limit changes, OR search changes
+  // Fetch students
   useEffect(() => {
-    // Note: Ensure your backend & hook support accepting a search term parameter here
     fetchStudentsByBranch(undefined, currentPage, limit, debouncedSearch);
   }, [fetchStudentsByBranch, currentPage, limit, debouncedSearch]);
 
-  const handlePageChange = (newPage) => {
-    setCurrentPage(newPage);
-  };
+  // --- Dropdown Logic Extraction (NEW) ---
+  // Get unique classes from the sections array
+  const uniqueClasses = Array.from(new Set(sections?.map((s) => s.className).filter(Boolean)));
+  
+  // Get sections based on the currently selected class in the form
+  const availableSections = sections
+    ?.filter((s) => s.className === formData.studentClass)
+    .map((s) => s.sectionName)
+    .filter(Boolean);
+
+  const handlePageChange = (newPage) => setCurrentPage(newPage);
 
   const handleLimitChange = (e) => {
     const newLimit = parseInt(e.target.value, 10);
@@ -81,16 +97,21 @@ export default function Students() {
     setCurrentPage(1);
   };
 
-  const handleSearchChange = (e) => {
-    setSearchTerm(e.target.value);
-  };
+  const handleSearchChange = (e) => setSearchTerm(e.target.value);
 
+  // UPDATE: Adjusted to reset section if class changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value
-    }));
+    setFormData((prev) => {
+      const updatedData = { ...prev, [name]: value };
+      
+      // If the user changes the class, reset the section so they don't submit mismatched data
+      if (name === 'studentClass') {
+        updatedData.section = '';
+      }
+      
+      return updatedData;
+    });
   };
 
   const resetForm = () => {
@@ -104,14 +125,12 @@ export default function Students() {
     setIsModalOpen(false);
   };
 
-  // Handle Delete (DELETE)
+  // Handle Delete
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this student?")) {
       try {
         await removeStudent(id);
         toast.success("Student deleted successfully!");
-        
-        // UPDATE: Edge case - if deleting the last item on the current page, go to previous page
         if (students.length === 1 && currentPage > 1) {
           setCurrentPage(prev => prev - 1);
         } else {
@@ -128,7 +147,6 @@ export default function Students() {
     try {
       const fetchedStudent = await fetchStudentById(id);
       const data = fetchedStudent?.data || fetchedStudent;
-      
       if (data) {
         setViewData(data);
         setIsViewModalOpen(true);
@@ -163,7 +181,7 @@ export default function Students() {
     }
   };
 
-  // Handle Edit Form Submission (UPDATE)
+  // Handle Edit Form Submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -179,8 +197,6 @@ export default function Students() {
     }
   };
 
-  // UPDATE: Kept local search as a fallback ONLY if the backend search term implementation isn't ready yet.
-  // Ideally, 'students' coming from the backend will already be filtered based on 'debouncedSearch'.
   const filteredStudents = students?.filter((student) => {
     if (!searchTerm) return true;
     const lowerSearch = searchTerm.toLowerCase();
@@ -401,32 +417,46 @@ export default function Students() {
             </div>
 
             <div className="flex gap-4">
+              
+              {/* --- UPDATE: Class Dropdown --- */}
               <div className="form-control w-full">
                 <label className="label">
                   <span className="label-text font-semibold text-base-content">Class</span>
                 </label>
-                <input 
-                  type="text" 
+                <select 
                   name="studentClass"
                   value={formData.studentClass}
                   onChange={handleInputChange}
                   required
-                  className="input input-bordered w-full focus:input-primary"
-                />
+                  className="select select-bordered w-full focus:select-primary"
+                >
+                  <option value="" disabled>Select Class</option>
+                  {uniqueClasses.map((cls, idx) => (
+                    <option key={idx} value={cls}>{cls}</option>
+                  ))}
+                </select>
               </div>
+
+              {/* --- UPDATE: Section Dropdown --- */}
               <div className="form-control w-full">
                 <label className="label">
                   <span className="label-text font-semibold text-base-content">Section</span>
                 </label>
-                <input 
-                  type="text" 
+                <select 
                   name="section"
                   value={formData.section}
                   onChange={handleInputChange}
                   required
-                  className="input input-bordered w-full focus:input-primary"
-                />
+                  disabled={!formData.studentClass} // Disable until a class is selected
+                  className="select select-bordered w-full focus:select-primary disabled:opacity-50"
+                >
+                  <option value="" disabled>Select Section</option>
+                  {availableSections?.map((sec, idx) => (
+                    <option key={idx} value={sec}>{sec}</option>
+                  ))}
+                </select>
               </div>
+
             </div>
 
             <div className="form-control w-full">

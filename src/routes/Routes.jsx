@@ -31,10 +31,10 @@ import Admissions from "../pages/Dashboard/Admissions";
 import AttendanceReport from "../pages/Dashboard/AttendanceReport";
 import Attendance from "../pages/Dashboard/Attendance";
 import Calendar from "../pages/Dashboard/Calendar";
-import Staff from "../pages/Dashboard/Staff";
+
 import Subjects from "../pages/Dashboard/Subjects";
 import TeacherAttendance from "../pages/Dashboard/TeacherAttendance";
-import StaffAttendance from "../pages/Dashboard/StaffAttendance";
+
 import Exams from "../pages/Dashboard/Exams";
 import Results from "../pages/Dashboard/Results";
 import Routine from "../pages/Dashboard/Routine";
@@ -48,6 +48,10 @@ import Register from "../pages/Register";
 import HomePage from "../pages/HomePage";
 import Error404 from "../pages/Error404";
 import NavHome from "../pages/NavHome";
+import Employee from "../pages/Dashboard/Employee";
+import EmployeeAttendance from "../pages/Dashboard/EmployeeAttendance";
+import EmployeeRole from "../pages/Dashboard/EmployeeRole";
+
 
 
 
@@ -107,8 +111,8 @@ export const router = createBrowserRouter([
         element: <PrivateRoot><Teachers /></PrivateRoot>,
       },
       {
-        path: "staff",
-        element: <PrivateRoot><Staff /></PrivateRoot>,
+        path: "employee",
+        element: <PrivateRoot><Employee /></PrivateRoot>,
       },
       {
         path: "classes",
@@ -130,9 +134,13 @@ export const router = createBrowserRouter([
         path: "teacher-attendance",
         element: <PrivateRoot><TeacherAttendance /></PrivateRoot>,
       },
+        {
+        path: "employee-role",
+        element: <PrivateRoot><EmployeeRole /></PrivateRoot>,
+      },
       {
-        path: "staff-attendance",
-        element: <PrivateRoot><StaffAttendance /></PrivateRoot>,
+        path: "employee-attendance",
+        element: <PrivateRoot><EmployeeAttendance /></PrivateRoot>,
       },
       {
         path: "attendance-report",
