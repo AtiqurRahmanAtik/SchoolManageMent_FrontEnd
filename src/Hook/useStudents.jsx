@@ -12,12 +12,12 @@ export const useStudents = () => {
 
   const { branch } = useAuth(); 
 
-  // GET: All Students (Paginated)
-  const fetchAllStudents = useCallback(async (page = 1, limit = 10) => {
+  // GET: All Students (Paginated & Searchable)
+  const fetchAllStudents = useCallback(async (page = 1, limit = 10, search = "") => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`${API}/?page=${page}&limit=${limit}`);
+      const response = await fetch(`${API}/?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`);
       const result = await response.json();
       
       if (!response.ok) throw new Error(result.error || "Failed to fetch students");
@@ -33,12 +33,12 @@ export const useStudents = () => {
   }, []);
 
   
-  // GET: All Students by Branch (Paginated)
-  const fetchStudentsByBranch = useCallback(async (targetBranch = branch, page = 1, limit = 10) => {
+  // GET: All Students by Branch (Paginated & Searchable)
+  const fetchStudentsByBranch = useCallback(async (targetBranch = branch, page = 1, limit = 10, search = "") => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`${API}/${targetBranch}/get-all?page=${page}&limit=${limit}`);
+      const response = await fetch(`${API}/${targetBranch}/get-all?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`);
       const result = await response.json();
       
       if (!response.ok) throw new Error(result.error || "Failed to fetch branch students");

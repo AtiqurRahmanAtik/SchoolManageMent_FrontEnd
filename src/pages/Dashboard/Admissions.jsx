@@ -57,6 +57,7 @@ const initialFormState = {
   studentPhoto: '', 
   dateOfAdmission: '',
   discountInFee: '',
+  mobileNo: '', 
   dateOfBirth: '',
   studentBirthFormId: '',
   gender: '',
@@ -79,8 +80,6 @@ const initialFormState = {
   motherEducation: '',
   motherMobileNo: '',
   motherIncome: '',
-  selectFamily: '',
-  mobileNo: '', 
 };
 
 export default function Admissions() {
@@ -96,9 +95,6 @@ export default function Admissions() {
 
   // State for form data
   const [formData, setFormData] = useState(initialFormState);
-  
-  // State for toggling parents section visibility
-  const [showParents, setShowParents] = useState(false);
 
   // Extract unique Class Names from the fetched sections
   const uniqueClasses = useMemo(() => {
@@ -130,7 +126,6 @@ export default function Admissions() {
 
   const handleReset = () => {
     setFormData(initialFormState); // Clear form fields
-    setShowParents(false);         // Hide parent sections on reset
   };
 
   const handleSubmit = async (e) => {
@@ -198,11 +193,11 @@ export default function Admissions() {
                 options={availableSections} 
               />
               
-              <AdmissionField label="Picture Name / URL (Optional)" name="studentPhoto" type="text" value={formData.studentPhoto} onChange={handleChange} placeholder="Image link or file name" />
+              <AdmissionField label="Picture Name / URL" name="studentPhoto" type="text" value={formData.studentPhoto} onChange={handleChange} placeholder="Image link or file name" required />
               <AdmissionField label="Date of Admission" name="dateOfAdmission" type="date" value={formData.dateOfAdmission} onChange={handleChange} required />
               
               <AdmissionField label="Discount In Fee (%)" name="discountInFee" type="number" value={formData.discountInFee} onChange={handleChange} placeholder="0" required />
-              <AdmissionField label="Mobile No / WhatsApp" name="mobileNo" value={formData.mobileNo} onChange={handleChange} placeholder="+1 234 567 8900" />
+              <AdmissionField label="Mobile No / WhatsApp" name="mobileNo" value={formData.mobileNo} onChange={handleChange} placeholder="+1 234 567 8900" required />
             </div>
           </section>
 
@@ -213,87 +208,60 @@ export default function Admissions() {
               <h2 className="text-2xl font-bold text-gray-800 tracking-tight">Other Information</h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-6">
-              <AdmissionField label="Date Of Birth" name="dateOfBirth" type="date" value={formData.dateOfBirth} onChange={handleChange} />
-              <AdmissionField label="Student Birth Form ID / NIC" name="studentBirthFormId" value={formData.studentBirthFormId} onChange={handleChange} placeholder="ID Number" />
+              <AdmissionField label="Date Of Birth" name="dateOfBirth" type="date" value={formData.dateOfBirth} onChange={handleChange} required />
+              <AdmissionField label="Student Birth Form ID / NIC" name="studentBirthFormId" value={formData.studentBirthFormId} onChange={handleChange} placeholder="ID Number" required />
               
-              <AdmissionField label="Gender" name="gender" type="select" value={formData.gender} onChange={handleChange} options={['Male', 'Female', 'Other']} />
-              <AdmissionField label="Previous School" name="previousSchool" value={formData.previousSchool} onChange={handleChange} placeholder="School Name" />
-              <AdmissionField label="Religion" name="religion" type="select" value={formData.religion} onChange={handleChange} options={['Islam', 'Christianity', 'Hinduism', 'Buddhism', 'Other']} />
+              <AdmissionField label="Gender" name="gender" type="select" value={formData.gender} onChange={handleChange} options={['Male', 'Female', 'Other']} required />
+              <AdmissionField label="Previous School" name="previousSchool" value={formData.previousSchool} onChange={handleChange} placeholder="School Name" required />
+              <AdmissionField label="Religion" name="religion" type="select" value={formData.religion} onChange={handleChange} options={['Islam', 'Christianity', 'Hinduism', 'Buddhism', 'Other']} required />
               
-              <AdmissionField label="Blood Group" name="bloodGroup" type="select" value={formData.bloodGroup} onChange={handleChange} options={['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']} />
-              <AdmissionField label="Previous ID / Board Roll No" name="previousIdBoardRollNo" value={formData.previousIdBoardRollNo} onChange={handleChange} placeholder="Roll Number" />
-              <AdmissionField label="Total Siblings" name="totalSiblings" type="number" value={formData.totalSiblings} onChange={handleChange} placeholder="0" />
+              <AdmissionField label="Blood Group" name="bloodGroup" type="select" value={formData.bloodGroup} onChange={handleChange} options={['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']} required />
+              <AdmissionField label="Previous ID / Board Roll No" name="previousIdBoardRollNo" value={formData.previousIdBoardRollNo} onChange={handleChange} placeholder="Roll Number" required />
+              <AdmissionField label="Total Siblings" name="totalSiblings" type="number" value={formData.totalSiblings} onChange={handleChange} placeholder="0" required />
               
               <div className="md:col-span-2">
-                <AdmissionField label="Any Additional Note" name="additionalNote" value={formData.additionalNote} onChange={handleChange} placeholder="Special instructions or notes..." />
+                <AdmissionField label="Any Additional Note (or N/A)" name="additionalNote" value={formData.additionalNote} onChange={handleChange} placeholder="Special instructions or enter N/A" required />
               </div>
             </div>
             
-            <div className="mt-8 pt-6 border-t border-gray-100 flex flex-col md:flex-row gap-6 items-end">
-              <div className="flex-grow w-full">
-                <AdmissionField label="Full Address" name="address" value={formData.address} onChange={handleChange} placeholder="Street, City, State, Zip" />
-              </div>
-              <div className="w-full md:w-auto">
-                <button 
-                  type="button" 
-                  onClick={() => setShowParents(!showParents)}
-                  className={`w-full md:w-auto font-bold py-3 px-8 rounded-xl shadow-sm transition-all duration-200 border flex items-center justify-center
-                    ${showParents ? 'bg-red-100 hover:bg-red-200 text-red-800 border-red-200' : 'bg-amber-100 hover:bg-amber-200 text-amber-800 border-amber-200'}`}
-                >
-                  {showParents ? (
-                    <>
-                      <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                      Remove Parents Info
-                    </>
-                  ) : (
-                    <>
-                      <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
-                      Add Parents Info
-                    </>
-                  )}
-                </button>
-              </div>
+            <div className="mt-8 pt-6 border-t border-gray-100">
+              <AdmissionField label="Full Address" name="address" value={formData.address} onChange={handleChange} placeholder="Street, City, State, Zip" required />
             </div>
           </section>
 
-          {/* Render Sections 3 and 4 only if showParents is true */}
-          {showParents && (
-            <div className="space-y-12 animate-fade-in-down">
-              {/* Section 3: Father/Guardian Information */}
-              <section className="bg-white rounded-2xl p-6 shadow-[0_0_15px_rgba(0,0,0,0.03)] border border-gray-100">
-                <div className="flex items-center mb-6 border-b border-gray-100 pb-4">
-                  <span className="bg-indigo-600 text-white rounded-lg w-10 h-10 flex items-center justify-center mr-4 text-xl font-bold shadow-md">3</span>
-                  <h2 className="text-2xl font-bold text-gray-800 tracking-tight">Father/Guardian Info</h2>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-6">
-                  <AdmissionField label="Father Name" name="fatherName" value={formData.fatherName} onChange={handleChange} placeholder="Full Name" />
-                  <AdmissionField label="National ID" name="fatherNationalId" value={formData.fatherNationalId} onChange={handleChange} placeholder="National ID" />
-                  <AdmissionField label="Occupation" name="fatherOccupation" value={formData.fatherOccupation} onChange={handleChange} placeholder="Job Title" />
-                  
-                  <AdmissionField label="Education" name="fatherEducation" value={formData.fatherEducation} onChange={handleChange} placeholder="Highest Degree" />
-                  <AdmissionField label="Mobile No" name="fatherMobileNo" value={formData.fatherMobileNo} onChange={handleChange} placeholder="Phone Number" />
-                  <AdmissionField label="Monthly Income" name="fatherIncome" type="number" value={formData.fatherIncome} onChange={handleChange} placeholder="Amount" />
-                </div>
-              </section>
-
-              {/* Section 4: Mother Information */}
-              <section className="bg-white rounded-2xl p-6 shadow-[0_0_15px_rgba(0,0,0,0.03)] border border-gray-100">
-                <div className="flex items-center mb-6 border-b border-gray-100 pb-4">
-                  <span className="bg-indigo-600 text-white rounded-lg w-10 h-10 flex items-center justify-center mr-4 text-xl font-bold shadow-md">4</span>
-                  <h2 className="text-2xl font-bold text-gray-800 tracking-tight">Mother Information</h2>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-6">
-                  <AdmissionField label="Mother Name" name="motherName" value={formData.motherName} onChange={handleChange} placeholder="Full Name" />
-                  <AdmissionField label="National ID" name="motherNationalId" value={formData.motherNationalId} onChange={handleChange} placeholder="National ID" />
-                  <AdmissionField label="Occupation" name="motherOccupation" value={formData.motherOccupation} onChange={handleChange} placeholder="Job Title" />
-                  
-                  <AdmissionField label="Education" name="motherEducation" value={formData.motherEducation} onChange={handleChange} placeholder="Highest Degree" />
-                  <AdmissionField label="Mobile No" name="motherMobileNo" value={formData.motherMobileNo} onChange={handleChange} placeholder="Phone Number" />
-                  <AdmissionField label="Monthly Income" name="motherIncome" type="number" value={formData.motherIncome} onChange={handleChange} placeholder="Amount" />
-                </div>
-              </section>
+          {/* Section 3: Father/Guardian Information */}
+          <section className="bg-white rounded-2xl p-6 shadow-[0_0_15px_rgba(0,0,0,0.03)] border border-gray-100">
+            <div className="flex items-center mb-6 border-b border-gray-100 pb-4">
+              <span className="bg-indigo-600 text-white rounded-lg w-10 h-10 flex items-center justify-center mr-4 text-xl font-bold shadow-md">3</span>
+              <h2 className="text-2xl font-bold text-gray-800 tracking-tight">Father/Guardian Info</h2>
             </div>
-          )}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-6">
+              <AdmissionField label="Father Name" name="fatherName" value={formData.fatherName} onChange={handleChange} placeholder="Full Name" required />
+              <AdmissionField label="National ID" name="fatherNationalId" value={formData.fatherNationalId} onChange={handleChange} placeholder="National ID" required />
+              <AdmissionField label="Occupation" name="fatherOccupation" value={formData.fatherOccupation} onChange={handleChange} placeholder="Job Title" required />
+              
+              <AdmissionField label="Education" name="fatherEducation" value={formData.fatherEducation} onChange={handleChange} placeholder="Highest Degree" required />
+              <AdmissionField label="Mobile No" name="fatherMobileNo" value={formData.fatherMobileNo} onChange={handleChange} placeholder="Phone Number" required />
+              <AdmissionField label="Monthly Income" name="fatherIncome" type="number" value={formData.fatherIncome} onChange={handleChange} placeholder="Amount" required />
+            </div>
+          </section>
+
+          {/* Section 4: Mother Information */}
+          <section className="bg-white rounded-2xl p-6 shadow-[0_0_15px_rgba(0,0,0,0.03)] border border-gray-100">
+            <div className="flex items-center mb-6 border-b border-gray-100 pb-4">
+              <span className="bg-indigo-600 text-white rounded-lg w-10 h-10 flex items-center justify-center mr-4 text-xl font-bold shadow-md">4</span>
+              <h2 className="text-2xl font-bold text-gray-800 tracking-tight">Mother Information</h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-6">
+              <AdmissionField label="Mother Name" name="motherName" value={formData.motherName} onChange={handleChange} placeholder="Full Name" required />
+              <AdmissionField label="National ID" name="motherNationalId" value={formData.motherNationalId} onChange={handleChange} placeholder="National ID" required />
+              <AdmissionField label="Occupation" name="motherOccupation" value={formData.motherOccupation} onChange={handleChange} placeholder="Job Title" required />
+              
+              <AdmissionField label="Education" name="motherEducation" value={formData.motherEducation} onChange={handleChange} placeholder="Highest Degree" required />
+              <AdmissionField label="Mobile No" name="motherMobileNo" value={formData.motherMobileNo} onChange={handleChange} placeholder="Phone Number" required />
+              <AdmissionField label="Monthly Income" name="motherIncome" type="number" value={formData.motherIncome} onChange={handleChange} placeholder="Amount" required />
+            </div>
+          </section>
 
           {/* Footer Actions */}
           <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mt-12 pt-8 border-t border-gray-200">

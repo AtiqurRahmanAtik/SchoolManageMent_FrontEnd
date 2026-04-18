@@ -9,6 +9,7 @@ import Mtitle from '../../components library/Mtitle';
 import TableControls from '../../components/TableControls'; 
 import Pagination from '../../components/Pagination'; 
 import SkeletonLoader from '../../components/SkeletonLoader'; 
+import MtableLoading from '../../components library/MtableLoading'; 
 
 export default function Students() {
   const {
@@ -17,65 +18,169 @@ export default function Students() {
     loading,
     error,
     fetchStudentsByBranch,
+    fetchStudentById,
     removeStudent,
-    updateStudent // Added update API hook
+    updateStudent
   } = useStudents();
 
-  // State for pagination & table controls
+  // Local state for table controls
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [limit, setLimit] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState(""); // NEW: Debounce state
 
-  // State for Update/Edit Modal
-  const [editingStudent, setEditingStudent] = useState(null);
-  const [isUpdating, setIsUpdating] = useState(false);
+  // Edit Modal States
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [editId, setEditId] = useState(null);
+  const [formData, setFormData] = useState({
+    studentName: '',
+    studentClass: '',
+    section: '',
+    mobileNo: '',
+  });
 
-  // Fetch students when component mounts or page/limit changes
+  // View Modal States
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [viewData, setViewData] = useState(null);
+
+  // --- Dynamic Table Headers ---
+  const tableHeaders = [
+    { id: "student", label: "Student Profile", className: "py-4 rounded-tl-box" },
+    { id: "registration", label: "Registration", className: "py-4 hidden sm:table-cell" },
+    { id: "classInfo", label: "Class & Section", className: "py-4 hidden md:table-cell" },
+    { id: "contact", label: "Contact Info", className: "py-4 hidden lg:table-cell" },
+    { id: "actions", label: "Actions", className: "py-4 text-right rounded-tr-box pr-8" }
+  ];
+
+  // UPDATE: Debounce the search term to prevent API spamming
   useEffect(() => {
-    fetchStudentsByBranch(undefined, currentPage, itemsPerPage);
-  }, [fetchStudentsByBranch, currentPage, itemsPerPage]);
+    const handler = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+      if (searchTerm) setCurrentPage(1); // Reset to page 1 when a new search triggers
+    }, 500); // 500ms delay
 
-  // Handle student deletion (DELETE)
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [searchTerm]);
+
+  // UPDATE: Fetch students when component mounts, page/limit changes, OR search changes
+  useEffect(() => {
+    // Note: Ensure your backend & hook support accepting a search term parameter here
+    fetchStudentsByBranch(undefined, currentPage, limit, debouncedSearch);
+  }, [fetchStudentsByBranch, currentPage, limit, debouncedSearch]);
+
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+  };
+
+  const handleLimitChange = (e) => {
+    const newLimit = parseInt(e.target.value, 10);
+    setLimit(newLimit);
+    setCurrentPage(1);
+  };
+
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const resetForm = () => {
+    setFormData({
+      studentName: '',
+      studentClass: '',
+      section: '',
+      mobileNo: '',
+    });
+    setEditId(null);
+    setIsModalOpen(false);
+  };
+
+  // Handle Delete (DELETE)
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this student?")) {
       try {
         await removeStudent(id);
         toast.success("Student deleted successfully!");
-        fetchStudentsByBranch(undefined, currentPage, itemsPerPage);
+        
+        // UPDATE: Edge case - if deleting the last item on the current page, go to previous page
+        if (students.length === 1 && currentPage > 1) {
+          setCurrentPage(prev => prev - 1);
+        } else {
+          fetchStudentsByBranch(undefined, currentPage, limit, debouncedSearch);
+        }
       } catch (err) {
         toast.error(err.message || "Failed to delete student.");
       }
     }
   };
 
-  // Handle Edit button click
-  const handleEditClick = (student) => {
-    setEditingStudent(student); // Open modal with student data
-  };
-
-  // Handle Edit form submission (UPDATE)
-  const handleUpdateSubmit = async (e) => {
-    e.preventDefault();
-    setIsUpdating(true);
+  // Handle View Button Click
+  const handleViewClick = async (id) => {
     try {
-      await updateStudent(editingStudent._id, editingStudent);
-      toast.success("Student updated successfully!");
-      setEditingStudent(null); // Close modal
-      fetchStudentsByBranch(undefined, currentPage, itemsPerPage); // Refresh data
+      const fetchedStudent = await fetchStudentById(id);
+      const data = fetchedStudent?.data || fetchedStudent;
+      
+      if (data) {
+        setViewData(data);
+        setIsViewModalOpen(true);
+      } else {
+        toast.error("Could not load student data for viewing.");
+      }
     } catch (err) {
-      toast.error(err.message || "Failed to update student.");
-    } finally {
-      setIsUpdating(false);
+      toast.error("Failed to fetch student details.");
     }
   };
 
-  // Handle Edit Form Input Changes
-  const handleEditChange = (e) => {
-    const { name, value } = e.target;
-    setEditingStudent(prev => ({ ...prev, [name]: value }));
+  // Handle Edit Button Click
+  const handleEditClick = async (id) => {
+    try {
+      const fetchedStudent = await fetchStudentById(id);
+      const data = fetchedStudent?.data || fetchedStudent;
+
+      if (data) {
+        setFormData({
+          studentName: data.studentName || '',
+          studentClass: data.studentClass || '',
+          section: data.section || '',
+          mobileNo: data.mobileNo || data.fatherMobileNo || '',
+        });
+        setEditId(data._id);
+        setIsModalOpen(true);
+      } else {
+        toast.error("Could not load student data for editing.");
+      }
+    } catch (err) {
+      toast.error("Failed to fetch student details.");
+    }
   };
 
-  // Local Search Filtering (READ)
+  // Handle Edit Form Submission (UPDATE)
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    try {
+      await updateStudent(editId, formData);
+      toast.success("Student updated successfully!");
+      resetForm();
+      fetchStudentsByBranch(undefined, currentPage, limit, debouncedSearch); 
+    } catch (err) {
+      toast.error(err.message || "Failed to update student.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // UPDATE: Kept local search as a fallback ONLY if the backend search term implementation isn't ready yet.
+  // Ideally, 'students' coming from the backend will already be filtered based on 'debouncedSearch'.
   const filteredStudents = students?.filter((student) => {
     if (!searchTerm) return true;
     const lowerSearch = searchTerm.toLowerCase();
@@ -86,229 +191,344 @@ export default function Students() {
     );
   });
 
-  // Reusable action buttons for the table rows
-  const renderActionButtons = (student) => (
-    <div className="flex items-center justify-end gap-2">
-      <button 
-        onClick={() => handleEditClick(student)}
-        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-        title="Edit Student"
-      >
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-      </button>
-      <button 
-        onClick={() => handleDelete(student._id)}
-        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-        title="Delete Student"
-      >
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-      </button>
-    </div>
-  );
-
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8 font-sans relative">
+    <div className="p-4 md:p-8 max-w-7xl mx-auto font-sans relative">
       <ToastContainer position="top-right" autoClose={3000} />
       
-      <div className="max-w-7xl mx-auto">
-        
-        {/* REUSABLE TITLE COMPONENT */}
-        <Mtitle 
-          title="Students Directory" 
-          middlecontent={<span className="text-sm text-gray-500">Manage and view all enrolled students.</span>}
-          rightcontent={
-            <Link to={"/admissions"}>
-              <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-medium shadow-sm transition-colors flex items-center gap-2">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4"></path></svg>
-                Add New Student
-              </button>
-            </Link>
-          }
-        />
-
-        {/* Error State */}
-        {error && (
-          <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-r-lg shadow-sm">
-            <p className="font-semibold">Error Loading Students</p>
-            <p>{error}</p>
-            <button 
-              onClick={() => fetchStudentsByBranch(undefined, currentPage, itemsPerPage)}
-              className="mt-2 text-sm underline font-medium hover:text-red-800"
-            >
-              Try Again
+      {/* Header Section */}
+      <Mtitle 
+        title="Students Directory" 
+        middlecontent={
+          <span className="text-sm text-base-content/70 hidden md:inline-block">
+            Manage and view all enrolled students.
+          </span>
+        }
+        rightcontent={
+          <Link to={"/admissions"}>
+            <button className="btn btn-primary shadow-sm">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+              </svg>
+              Add New Student
             </button>
-          </div>
-        )}
+          </Link>
+        }
+      />
 
-        {/* Main Content Card */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden p-6">
-          
-          {/* REUSABLE TABLE CONTROLS */}
-          <div className="mb-6">
-            <TableControls 
-              itemsPerPage={itemsPerPage} 
-              onItemsPerPageChange={(e) => {
-                setItemsPerPage(Number(e.target.value));
-                setCurrentPage(1); // Reset to page 1 whenever the limit changes
-              }} 
-              searchTerm={searchTerm} 
-              onSearchChange={(e) => setSearchTerm(e.target.value)} 
-            />
+      {/* Error Alert */}
+      {error && (
+        <div className="alert alert-error shadow-lg mb-6">
+          <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current flex-shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <div className="flex flex-col">
+            <span className="font-semibold">Error Loading Students</span>
+            <span className="text-sm">{error}</span>
           </div>
+          <button 
+            onClick={() => fetchStudentsByBranch(undefined, currentPage, limit, debouncedSearch)}
+            className="btn btn-sm btn-outline border-white text-white hover:bg-white hover:text-error"
+          >
+            Try Again
+          </button>
+        </div>
+      )}
 
-          <div className="overflow-x-auto border border-gray-200 rounded-lg">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-gray-50 border-b border-gray-200">
-                  <th className="py-4 px-6 text-xs font-bold text-gray-600 uppercase tracking-wider">Student Info</th>
-                  <th className="py-4 px-6 text-xs font-bold text-gray-600 uppercase tracking-wider">Registration</th>
-                  <th className="py-4 px-6 text-xs font-bold text-gray-600 uppercase tracking-wider">Class & Section</th>
-                  <th className="py-4 px-6 text-xs font-bold text-gray-600 uppercase tracking-wider">Contact</th>
-                  <th className="py-4 px-6 text-xs font-bold text-gray-600 uppercase tracking-wider text-right">Actions</th>
+      {/* Table Controls (Search & Limit) */}
+      <div className="bg-base-100 p-4 rounded-xl shadow-sm border border-base-200 mb-6">
+        <TableControls 
+          itemsPerPage={limit} 
+          onItemsPerPageChange={handleLimitChange} 
+          searchTerm={searchTerm} 
+          onSearchChange={handleSearchChange} 
+        />
+      </div>
+
+      {/* Main Table Card */}
+      <div className="card bg-base-100 shadow-xl border border-base-200">
+        <div className="overflow-x-auto rounded-box">
+          <table className="table table-zebra w-full">
+            <thead className="bg-base-200 text-base-content text-sm">
+              <tr>
+                {tableHeaders.map((header) => (
+                  <th key={header.id} className={header.className}>
+                    {header.label}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            
+            <tbody>
+              {loading ? (
+                <SkeletonLoader />
+              ) : filteredStudents?.length === 0 ? (
+                <tr>
+                  <td colSpan={tableHeaders.length} className="py-12 text-center">
+                    <MtableLoading data={filteredStudents} />
+                    <div className="flex flex-col items-center justify-center text-base-content/50 mt-[-40px]">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                      </svg>
+                      <p className="text-lg font-medium">No students found</p>
+                      <p className="text-sm">Try adjusting your search criteria or add new students.</p>
+                    </div>
+                  </td>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                
-                {loading ? (
-                  /* REUSABLE SKELETON LOADER */
-                  <SkeletonLoader />
-                ) : filteredStudents && filteredStudents.length > 0 ? (
-                  /* Render Data */
-                  filteredStudents.map((student) => (
-                    <tr key={student._id} className="hover:bg-gray-50/50 transition-colors">
-                      <td className="py-4 px-6 whitespace-nowrap">
-                        <div className="flex items-center gap-4">
-                          <img 
-                            src={student.studentPhoto || `https://ui-avatars.com/api/?name=${encodeURIComponent(student.studentName)}&background=random`} 
-                            alt={student.studentName} 
-                            className="w-10 h-10 rounded-full object-cover border border-gray-200"
-                          />
-                          <div>
-                            <p className="font-semibold text-gray-900">{student.studentName}</p>
-                            <p className="text-sm text-gray-500">{student.gender || 'N/A'}</p>
+              ) : (
+                filteredStudents?.map((student) => (
+                  <tr key={student._id} className="hover">
+                    
+                    {/* Student Profile Column */}
+                    <td className="py-4">
+                      <div className="flex items-center space-x-3">
+                        <div className="avatar">
+                          <div className="mask mask-squircle w-10 h-10 bg-base-200">
+                            <img 
+                              src={student.studentPhoto || `https://ui-avatars.com/api/?name=${encodeURIComponent(student.studentName)}&background=random`} 
+                              alt={student.studentName} 
+                              onError={(e) => { e.target.src = 'https://via.placeholder.com/40'; }}
+                            />
                           </div>
                         </div>
-                      </td>
-                      <td className="py-4 px-6 whitespace-nowrap">
-                        <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-800 border border-gray-200">
-                          {student.registrationNo || 'N/A'}
-                        </span>
-                      </td>
-                      <td className="py-4 px-6 whitespace-nowrap">
-                        <p className="font-medium text-gray-900">{student.studentClass || 'N/A'}</p>
-                        <p className="text-sm text-gray-500">Sec: {student.section || 'N/A'}</p>
-                      </td>
-                      <td className="py-4 px-6 whitespace-nowrap">
-                        <p className="text-sm text-gray-900">{student.mobileNo || student.fatherMobileNo || 'No Number'}</p>
-                      </td>
-                      <td className="py-4 px-6 whitespace-nowrap">
-                        {renderActionButtons(student)}
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  /* Empty State */
-                  <tr>
-                    <td colSpan="5" className="py-12 text-center text-gray-500">
-                      <div className="flex flex-col items-center">
-                        <svg className="w-12 h-12 text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-                        <p className="font-medium">No students found.</p>
-                        <p className="text-sm mt-1">Try adjusting your search criteria or add new students.</p>
+                        <div>
+                          <div className="font-semibold text-base">{student.studentName}</div>
+                          <div className="text-xs text-base-content/60">{student.gender || 'N/A'}</div>
+                        </div>
+                      </div>
+                    </td>
+
+                    {/* Registration Column */}
+                    <td className="py-4 hidden sm:table-cell">
+                      <div className="badge badge-ghost font-medium">
+                        {student.registrationNo || 'N/A'}
+                      </div>
+                    </td>
+
+                    {/* Class & Section Column */}
+                    <td className="py-4 hidden md:table-cell">
+                      <div className="text-sm font-medium">{student.studentClass || 'N/A'}</div>
+                      <div className="text-xs text-base-content/60">Sec: {student.section || 'N/A'}</div>
+                    </td>
+
+                    {/* Contact Column */}
+                    <td className="py-4 hidden lg:table-cell">
+                      <div className="text-sm font-medium">{student.mobileNo || student.fatherMobileNo || 'No Number'}</div>
+                    </td>
+
+                    {/* Actions Column */}
+                    <td className="py-4 text-right pr-6">
+                      <div className="join justify-end">
+                        <button 
+                          onClick={() => handleViewClick(student._id)}
+                          className="btn btn-sm btn-ghost text-success join-item"
+                          title="View Details"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                          </svg>
+                          <span className="hidden sm:inline ml-1">View</span>
+                        </button>
+                        <button 
+                          onClick={() => handleEditClick(student._id)}
+                          className="btn btn-sm btn-ghost text-info join-item"
+                          title="Edit Student"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                          </svg>
+                          <span className="hidden sm:inline ml-1">Edit</span>
+                        </button>
+                        <button 
+                          onClick={() => handleDelete(student._id)}
+                          className="btn btn-sm btn-ghost text-error join-item"
+                          title="Delete Student"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                          <span className="hidden sm:inline ml-1">Delete</span>
+                        </button>
                       </div>
                     </td>
                   </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-
-          {/* REUSABLE PAGINATION */}
-          {!loading && pagination && (
-            <div className="mt-6">
-              <Pagination 
-                currentPage={currentPage}
-                totalPages={pagination.totalPages || 1}
-                totalItems={pagination.totalItems || 0}
-                itemsPerPage={itemsPerPage}
-                onPageChange={setCurrentPage}
-              />
-            </div>
-          )}
-
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
 
-      {/* --- EDIT STUDENT MODAL --- */}
-      {editingStudent && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden animate-fade-in-down">
-            
-            <div className="flex justify-between items-center p-6 border-b border-gray-100">
-              <h3 className="text-xl font-bold text-gray-900">Edit Student Info</h3>
-              <button onClick={() => setEditingStudent(null)} className="text-gray-400 hover:text-gray-600 transition">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-              </button>
-            </div>
-
-            <form onSubmit={handleUpdateSubmit} className="p-6 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Student Name</label>
-                <input 
-                  type="text" name="studentName" required
-                  value={editingStudent.studentName || ''} onChange={handleEditChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Class</label>
-                  <input 
-                    type="text" name="studentClass" required
-                    value={editingStudent.studentClass || ''} onChange={handleEditChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Section</label>
-                  <input 
-                    type="text" name="section" required
-                    value={editingStudent.section || ''} onChange={handleEditChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Contact Number</label>
-                <input 
-                  type="text" name="mobileNo"
-                  value={editingStudent.mobileNo || ''} onChange={handleEditChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
-                />
-              </div>
-
-              <div className="pt-4 flex gap-3 justify-end">
-                <button 
-                  type="button" 
-                  onClick={() => setEditingStudent(null)}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
-                >
-                  Cancel
-                </button>
-                <button 
-                  type="submit" 
-                  disabled={isUpdating}
-                  className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:opacity-50"
-                >
-                  {isUpdating ? 'Saving...' : 'Save Changes'}
-                </button>
-              </div>
-            </form>
-
+      {/* Pagination Container */}
+      {!loading && pagination && pagination.totalPages > 1 && (
+        <div className="flex justify-center md:justify-end mt-6">
+          <div className="join shadow-sm border border-base-200 rounded-lg bg-base-100">
+            <Pagination 
+              currentPage={currentPage}
+              totalPages={pagination.totalPages || 1}
+              totalItems={pagination.totalItems || 0}
+              itemsPerPage={limit}
+              onPageChange={handlePageChange}
+            />
           </div>
         </div>
       )}
+
+      {/* --- EDIT STUDENT MODAL (DaisyUI) --- */}
+      <div className={`modal ${isModalOpen ? "modal-open" : ""}`} style={{ zIndex: 999 }}>
+        <div className="modal-box">
+          <button onClick={resetForm} className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">
+            ✕
+          </button>
+          
+          <h3 className="font-bold text-xl mb-4 border-b border-base-200 pb-2">
+            Edit Student Details
+          </h3>
+
+          <form onSubmit={handleSubmit} className="py-2 space-y-3">
+            <div className="form-control w-full">
+              <label className="label">
+                <span className="label-text font-semibold text-base-content">Student Name</span>
+              </label>
+              <input 
+                type="text" 
+                name="studentName"
+                value={formData.studentName}
+                onChange={handleInputChange}
+                required
+                className="input input-bordered w-full focus:input-primary"
+              />
+            </div>
+
+            <div className="flex gap-4">
+              <div className="form-control w-full">
+                <label className="label">
+                  <span className="label-text font-semibold text-base-content">Class</span>
+                </label>
+                <input 
+                  type="text" 
+                  name="studentClass"
+                  value={formData.studentClass}
+                  onChange={handleInputChange}
+                  required
+                  className="input input-bordered w-full focus:input-primary"
+                />
+              </div>
+              <div className="form-control w-full">
+                <label className="label">
+                  <span className="label-text font-semibold text-base-content">Section</span>
+                </label>
+                <input 
+                  type="text" 
+                  name="section"
+                  value={formData.section}
+                  onChange={handleInputChange}
+                  required
+                  className="input input-bordered w-full focus:input-primary"
+                />
+              </div>
+            </div>
+
+            <div className="form-control w-full">
+              <label className="label">
+                <span className="label-text font-semibold text-base-content">Contact Number</span>
+              </label>
+              <input 
+                type="text" 
+                name="mobileNo"
+                value={formData.mobileNo}
+                onChange={handleInputChange}
+                className="input input-bordered w-full focus:input-primary"
+              />
+            </div>
+
+            <div className="modal-action mt-6">
+              <button 
+                type="button" 
+                onClick={resetForm}
+                disabled={isSubmitting}
+                className="btn btn-ghost"
+              >
+                Cancel
+              </button>
+              <button 
+                type="submit" 
+                disabled={isSubmitting}
+                className="btn btn-primary min-w-[120px]"
+              >
+                {isSubmitting ? <span className="loading loading-spinner loading-sm"></span> : 'Save Changes'}
+              </button>
+            </div>
+          </form>
+        </div>
+        <div className="modal-backdrop" onClick={resetForm}>
+          <button className="cursor-default">close</button>
+        </div>
+      </div>
+
+      {/* --- VIEW STUDENT MODAL (DaisyUI) --- */}
+      <div className={`modal ${isViewModalOpen ? "modal-open" : ""}`} style={{ zIndex: 999 }}>
+        <div className="modal-box">
+          <button onClick={() => setIsViewModalOpen(false)} className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">
+            ✕
+          </button>
+          
+          <h3 className="font-bold text-xl mb-4 border-b border-base-200 pb-2">
+            Student Profile
+          </h3>
+          
+          {viewData && (
+            <div className="flex flex-col items-center py-4">
+              <div className="avatar mb-4">
+                <div className="w-32 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
+                  <img 
+                    src={viewData.studentPhoto || `https://ui-avatars.com/api/?name=${encodeURIComponent(viewData.studentName)}&background=random`} 
+                    alt={viewData.studentName} 
+                    onError={(e) => { e.target.src = 'https://via.placeholder.com/150'; }}
+                  />
+                </div>
+              </div>
+              
+              <h3 className="text-2xl font-bold text-base-content mb-1">{viewData.studentName}</h3>
+              <div className="badge badge-primary badge-outline font-medium mb-6 px-4 py-3">
+                Class {viewData.studentClass} - Sec {viewData.section}
+              </div>
+              
+              <div className="w-full bg-base-200 rounded-xl p-5 space-y-3">
+                <div className="flex items-center">
+                  <span className="font-semibold text-base-content/70 w-28">Reg No:</span>
+                  <span className="text-base-content">{viewData.registrationNo || 'N/A'}</span>
+                </div>
+                <div className="flex items-center">
+                  <span className="font-semibold text-base-content/70 w-28">Gender:</span>
+                  <span className="text-base-content">{viewData.gender || 'N/A'}</span>
+                </div>
+                <div className="flex items-center">
+                  <span className="font-semibold text-base-content/70 w-28">Phone:</span>
+                  <span className="text-base-content">{viewData.mobileNo || viewData.fatherMobileNo || 'N/A'}</span>
+                </div>
+                <div className="flex items-center">
+                  <span className="font-semibold text-base-content/70 w-28">Branch:</span>
+                  <span className="text-base-content">{viewData.branch || 'N/A'}</span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="modal-action border-t border-base-200 pt-4 mt-2">
+             <button 
+                onClick={() => setIsViewModalOpen(false)}
+                className="btn btn-neutral"
+              >
+                Close
+              </button>
+          </div>
+        </div>
+        <div className="modal-backdrop" onClick={() => setIsViewModalOpen(false)}>
+          <button className="cursor-default">close</button>
+        </div>
+      </div>
+
     </div>
   );
 }

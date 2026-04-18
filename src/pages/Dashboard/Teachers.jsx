@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import useTeachers from '../../Hook/useTeachers'; // Adjust path as needed
 import Pagination from '../../components/Pagination'; // Adjust path as needed
 import TableControls from '../../components/TableControls'; // Adjust path as needed
