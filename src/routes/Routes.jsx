@@ -51,6 +51,7 @@ import NavHome from "../pages/NavHome";
 import Employee from "../pages/Dashboard/Employee";
 import EmployeeAttendance from "../pages/Dashboard/EmployeeAttendance";
 import EmployeeRole from "../pages/Dashboard/EmployeeRole";
+import EmployeeList from "../pages/Dashboard/EmployeeList";
 
 
 
@@ -110,10 +111,71 @@ export const router = createBrowserRouter([
         path: "teachers",
         element: <PrivateRoot><Teachers /></PrivateRoot>,
       },
-      {
-        path: "employee",
-        element: <PrivateRoot><Employee /></PrivateRoot>,
-      },
+
+     
+
+     
+// --- Employee Routes ---
+{
+  path: "employee",
+  children: [
+    {
+      index: true, 
+      element: (
+        <PrivateRoot>
+          <Employee />
+        </PrivateRoot>
+      ),
+    },
+    {
+      path: "role", 
+      element: (
+        <PrivateRoot>
+          <EmployeeRole />
+        </PrivateRoot>
+      ),
+    },
+    {
+      path: "list", 
+      element: (
+        <PrivateRoot>
+          <EmployeeList />
+        </PrivateRoot>
+      ),
+    },
+  ],
+},
+
+
+
+
+  // {
+  //   path: "employee",
+  //   element: (
+  //     <PrivateRoot>
+  //       <Employee />
+  //     </PrivateRoot>
+  //   ),
+  // },
+  // {
+  //   path: "employee-role",
+  //   element: (
+  //     <PrivateRoot>
+  //       <EmployeeRole />
+  //     </PrivateRoot>
+  //   ),
+  // },
+  
+
+
+      // {
+      //   path: "employee",
+      //   element: <PrivateRoot><Employee /></PrivateRoot>,
+      // },
+      //  {
+      //   path: "employee-role",
+      //   element: <PrivateRoot><EmployeeRole /></PrivateRoot>,
+      // },
       {
         path: "classes",
         element: <PrivateRoot><Classes /></PrivateRoot>,
@@ -134,10 +196,7 @@ export const router = createBrowserRouter([
         path: "teacher-attendance",
         element: <PrivateRoot><TeacherAttendance /></PrivateRoot>,
       },
-        {
-        path: "employee-role",
-        element: <PrivateRoot><EmployeeRole /></PrivateRoot>,
-      },
+       
       {
         path: "employee-attendance",
         element: <PrivateRoot><EmployeeAttendance /></PrivateRoot>,

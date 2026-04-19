@@ -24,8 +24,37 @@ const useMenuItems = () => {
     { title: "Students", path: "/students", icon: <MdOutlinePeople className="text-xl" /> },
     { title: "Admissions", path: "/admissions", icon: <MdOutlinePersonAdd className="text-xl" /> },
     { title: "Teachers", path: "/teachers", icon: <MdOutlineSchool className="text-xl" /> },
-    { title: "Employee Role", path: "/employee-role", icon: <MdOutlineBadge className="text-xl" /> },
-    { title: "Employees", path: "/employee", icon: <MdOutlineBadge className="text-xl" /> },
+
+
+{
+  title: "Employee",
+  icon: <MdOutlineSchool className="text-xl" />, 
+  list: [
+    {
+      title: "Employees",
+      path: "/employee",
+      icon: <MdOutlineSchool className="text-xl" />,
+    },
+     {
+      title: "Employee List",
+      path: "/employee/list", 
+      icon: <MdOutlineSchool className="text-xl" />,
+    },
+    {
+      title: "Employee Role",
+      path: "/employee/role", 
+      icon: <MdOutlineSchool className="text-xl" />,
+    },
+    
+  ],
+},
+
+
+
+    // { title: "Employee Role", path: "/employee-role", icon: <MdOutlineBadge className="text-xl" /> },
+    // { title: "Employees", path: "/employee", icon: <MdOutlineBadge className="text-xl" /> },
+
+
     { title: "Classes", path: "/classes", icon: <MdOutlineClass className="text-xl" /> },
     { title: "Section", path: "/section", icon: <MdOutlineClass className="text-xl" /> },
     { title: "Subjects", path: "/subjects", icon: <MdOutlineMenuBook className="text-xl" /> },

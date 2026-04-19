@@ -261,6 +261,8 @@ export default function Classes() {
               />
             </div>
 
+            
+
             <div className="modal-action mt-6">
               <button type="button" onClick={closeModal} className="btn btn-ghost">
                 Cancel
@@ -271,6 +273,10 @@ export default function Classes() {
             </div>
           </form>
         </div>
+
+
+        
+        
         
         {/* Click outside to close */}
         <div className="modal-backdrop" onClick={closeModal}>
