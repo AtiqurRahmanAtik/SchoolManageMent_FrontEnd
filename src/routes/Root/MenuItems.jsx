@@ -68,6 +68,13 @@ const useMenuItems = () => {
       path: "/attendance/student", // Correct router path
       icon: <MdOutlineFactCheck className="text-xl" /> 
     },
+   
+{ 
+      title: "Students Attendance Record", 
+      path: "/attendance/studentRecord", // Correct router path
+      icon: <MdOutlineFactCheck className="text-xl" /> 
+    },
+
     { 
       title: "Employee Attendance", 
       path: "/attendance/employee", // Correct router path

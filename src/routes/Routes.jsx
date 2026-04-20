@@ -53,6 +53,8 @@ import Employee from "../pages/Dashboard/Employee";
 import EmployeeRole from "../pages/Dashboard/EmployeeRole";
 import EmployeeList from "../pages/Dashboard/EmployeeList";
 import StudentAttendance from "../pages/Dashboard/StudentAttendance";
+import StudentsAttendanceRecord from "../pages/Dashboard/StudentsAttendanceRecord";
+import EmployeeAttendance from "../pages/Dashboard/EmployeeAttendance";
 
 
 
@@ -205,30 +207,27 @@ export const router = createBrowserRouter([
         </PrivateRoot>
       ),
     },
+     {
+     
+      path: "studentRecord", 
+      element: (
+        <PrivateRoot>
+          <StudentsAttendanceRecord />
+        </PrivateRoot>
+      ),
+    },
     {
       // URL will be: /attendance/employee
       path: "employee", 
       element: (
         <PrivateRoot>
-          <StudentAttendance />
+          <EmployeeAttendance />
         </PrivateRoot>
       ),
     },
   ],
 },
-      // {
-      //   path: "attendance",
-      //   element: <PrivateRoot><Attendance /></PrivateRoot>,
-      // },
-      // {
-      //   path: "teacher-attendance",
-      //   element: <PrivateRoot><TeacherAttendance /></PrivateRoot>,
-      // },
-       
-      // {
-      //   path: "employee-attendance",
-      //   element: <PrivateRoot><EmployeeAttendance /></PrivateRoot>,
-      // },
+      
       
       {
         path: "attendance-report",

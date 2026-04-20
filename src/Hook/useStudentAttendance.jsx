@@ -3,7 +3,6 @@ import useAuth from "./useAuth"; // Ensure you import your useAuth hook
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/student-attendance`;
 
-
 export const useStudentAttendance = () => {
   const [studentAttendances, setStudentAttendances] = useState([]);
   const [studentAttendanceDetails, setStudentAttendanceDetails] = useState(null);
@@ -13,14 +12,12 @@ export const useStudentAttendance = () => {
 
   const { branch } = useAuth(); 
 
-
-
-  // GET: All Student Attendances (Paginated)
-  const fetchAllStudentAttendances = useCallback(async (page = 1, limit = 10) => {
+  // GET: All Student Attendances (Paginated & Searchable)
+  const fetchAllStudentAttendances = useCallback(async (page = 1, limit = 10, search = "") => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`${API}/?page=${page}&limit=${limit}`);
+      const response = await fetch(`${API}/?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`);
       const result = await response.json();
       
       if (!response.ok) throw new Error(result.error || "Failed to fetch student attendances");
@@ -36,12 +33,12 @@ export const useStudentAttendance = () => {
   }, []);
 
   
-  // GET: All Student Attendances by Branch (Paginated)
-  const fetchStudentAttendancesByBranch = useCallback(async (targetBranch = branch, page = 1, limit = 10) => {
+  // GET: All Student Attendances by Branch (Paginated & Searchable)
+  const fetchStudentAttendancesByBranch = useCallback(async (targetBranch = branch, page = 1, limit = 10, search = "") => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`${API}/${targetBranch}/get-all?page=${page}&limit=${limit}`);
+      const response = await fetch(`${API}/${targetBranch}/get-all?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`);
       const result = await response.json();
       
       if (!response.ok) throw new Error(result.error || "Failed to fetch branch student attendances");
@@ -55,7 +52,6 @@ export const useStudentAttendance = () => {
       setLoading(false);
     }
   }, [branch]);
-  
 
   // GET: Single Student Attendance Details By ID
   const fetchStudentAttendanceById = useCallback(async (id) => {
@@ -65,7 +61,7 @@ export const useStudentAttendance = () => {
       const response = await fetch(`${API}/get-id/${id}`);
       const result = await response.json();
       
-      if (!response.ok) throw new Error(result.message || result.error || "Student Attendance not found");
+      if (!response.ok) throw new Error(result.message || result.error || "Student attendance not found");
       
       setStudentAttendanceDetails(result);
       return result;
@@ -81,14 +77,13 @@ export const useStudentAttendance = () => {
     setLoading(true);
     setError(null);
     try {
-      // Fallback to the authenticated user's branch if not provided in the form
       const payload = { ...studentAttendanceData, branch: studentAttendanceData.branch || branch };
       
       const response = await fetch(`${API}/post`, {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",
-          // "Authorization": `Bearer ${token}` // Add this if you enable authenticateToken middleware
+          // "Authorization": `Bearer ${token}` 
         },
         body: JSON.stringify(payload),
       });
@@ -99,7 +94,7 @@ export const useStudentAttendance = () => {
       return result;
     } catch (err) {
       setError(err.message);
-      throw err; // Re-throw so components can handle form submission errors
+      throw err; 
     } finally {
       setLoading(false);
     }
@@ -152,7 +147,6 @@ export const useStudentAttendance = () => {
       setLoading(false);
     }
   }, []);
-
 
   return {
     studentAttendances,
