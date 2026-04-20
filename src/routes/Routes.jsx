@@ -33,7 +33,7 @@ import Attendance from "../pages/Dashboard/Attendance";
 import Calendar from "../pages/Dashboard/Calendar";
 
 import Subjects from "../pages/Dashboard/Subjects";
-import TeacherAttendance from "../pages/Dashboard/TeacherAttendance";
+import TeacherAttendance from "../pages/Dashboard/StudentAttendance";
 
 import Exams from "../pages/Dashboard/Exams";
 import Results from "../pages/Dashboard/Results";
@@ -49,9 +49,10 @@ import HomePage from "../pages/HomePage";
 import Error404 from "../pages/Error404";
 import NavHome from "../pages/NavHome";
 import Employee from "../pages/Dashboard/Employee";
-import EmployeeAttendance from "../pages/Dashboard/EmployeeAttendance";
+
 import EmployeeRole from "../pages/Dashboard/EmployeeRole";
 import EmployeeList from "../pages/Dashboard/EmployeeList";
+import StudentAttendance from "../pages/Dashboard/StudentAttendance";
 
 
 
@@ -188,19 +189,47 @@ export const router = createBrowserRouter([
         path: "subjects",
         element: <PrivateRoot><Subjects /></PrivateRoot>,
       },
-      {
-        path: "attendance",
-        element: <PrivateRoot><Attendance /></PrivateRoot>,
-      },
-      {
-        path: "teacher-attendance",
-        element: <PrivateRoot><TeacherAttendance /></PrivateRoot>,
-      },
+
+
+
+// --- Attendance Routes ---
+{
+  path: "attendance",
+  children: [
+    {
+     
+      path: "student", 
+      element: (
+        <PrivateRoot>
+          <TeacherAttendance />
+        </PrivateRoot>
+      ),
+    },
+    {
+      // URL will be: /attendance/employee
+      path: "employee", 
+      element: (
+        <PrivateRoot>
+          <StudentAttendance />
+        </PrivateRoot>
+      ),
+    },
+  ],
+},
+      // {
+      //   path: "attendance",
+      //   element: <PrivateRoot><Attendance /></PrivateRoot>,
+      // },
+      // {
+      //   path: "teacher-attendance",
+      //   element: <PrivateRoot><TeacherAttendance /></PrivateRoot>,
+      // },
        
-      {
-        path: "employee-attendance",
-        element: <PrivateRoot><EmployeeAttendance /></PrivateRoot>,
-      },
+      // {
+      //   path: "employee-attendance",
+      //   element: <PrivateRoot><EmployeeAttendance /></PrivateRoot>,
+      // },
+      
       {
         path: "attendance-report",
         element: <PrivateRoot><AttendanceReport /></PrivateRoot>,

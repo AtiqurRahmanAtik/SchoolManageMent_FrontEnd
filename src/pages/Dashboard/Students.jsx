@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import useStudents from '../../Hook/useStudents'; 
-import useSection from '../../Hook/useSection'; // NEW: Import useSection hook
+import useSection from '../../Hook/useSection'; 
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Link } from 'react-router-dom';
@@ -25,7 +25,7 @@ export default function Students() {
     updateStudent
   } = useStudents();
 
-  // --- Section Hook (NEW) ---
+  // --- Section Hook ---
   const { sections, getSections } = useSection();
 
   // Local state for table controls
@@ -33,6 +33,12 @@ export default function Students() {
   const [limit, setLimit] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState(""); 
+
+  // --- NEW: Filter States ---
+  const [filterClass, setFilterClass] = useState("");
+  const [filterSection, setFilterSection] = useState("");
+  const [appliedFilterClass, setAppliedFilterClass] = useState("");
+  const [appliedFilterSection, setAppliedFilterSection] = useState("");
 
   // Edit Modal States
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -79,15 +85,21 @@ export default function Students() {
     fetchStudentsByBranch(undefined, currentPage, limit, debouncedSearch);
   }, [fetchStudentsByBranch, currentPage, limit, debouncedSearch]);
 
-  // --- Dropdown Logic Extraction (NEW) ---
+  // --- Dropdown Logic Extraction ---
   // Get unique classes from the sections array
   const uniqueClasses = Array.from(new Set(sections?.map((s) => s.className).filter(Boolean)));
   
-  // Get sections based on the currently selected class in the form
+  // Get sections based on the currently selected class in the EDIT form
   const availableSections = sections
     ?.filter((s) => s.className === formData.studentClass)
     .map((s) => s.sectionName)
     .filter(Boolean);
+
+  // Get sections based on the currently selected class in the FILTER dropdown
+  const filterAvailableSections = Array.from(new Set(sections
+    ?.filter((s) => !filterClass || s.className === filterClass)
+    .map((s) => s.sectionName)
+    .filter(Boolean)));
 
   const handlePageChange = (newPage) => setCurrentPage(newPage);
 
@@ -99,7 +111,7 @@ export default function Students() {
 
   const handleSearchChange = (e) => setSearchTerm(e.target.value);
 
-  // UPDATE: Adjusted to reset section if class changes
+  // Handle Input Change for Modals
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => {
@@ -123,6 +135,13 @@ export default function Students() {
     });
     setEditId(null);
     setIsModalOpen(false);
+  };
+
+  // --- NEW: Handle Filter Search ---
+  const handleFilterSearch = () => {
+    setAppliedFilterClass(filterClass);
+    setAppliedFilterSection(filterSection);
+    setCurrentPage(1);
   };
 
   // Handle Delete
@@ -197,14 +216,30 @@ export default function Students() {
     }
   };
 
+  // --- UPDATED: Applying Client-Side Filters ---
   const filteredStudents = students?.filter((student) => {
-    if (!searchTerm) return true;
-    const lowerSearch = searchTerm.toLowerCase();
-    return (
-      student.studentName?.toLowerCase().includes(lowerSearch) ||
-      student.registrationNo?.toLowerCase().includes(lowerSearch) ||
-      student.studentClass?.toLowerCase().includes(lowerSearch)
-    );
+    // 1. Check general search term
+    if (searchTerm) {
+      const lowerSearch = searchTerm.toLowerCase();
+      const matchSearch = 
+        student.studentName?.toLowerCase().includes(lowerSearch) ||
+        student.registrationNo?.toLowerCase().includes(lowerSearch) ||
+        student.studentClass?.toLowerCase().includes(lowerSearch);
+      
+      if (!matchSearch) return false;
+    }
+
+    // 2. Check Class filter
+    if (appliedFilterClass && student.studentClass !== appliedFilterClass) {
+      return false;
+    }
+
+    // 3. Check Section filter
+    if (appliedFilterSection && student.section !== appliedFilterSection) {
+      return false;
+    }
+
+    return true;
   });
 
   return (
@@ -222,7 +257,7 @@ export default function Students() {
         rightcontent={
           <Link to={"/admissions"}>
             <button className="btn btn-primary shadow-sm">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
               </svg>
               Add New Student
@@ -250,14 +285,82 @@ export default function Students() {
         </div>
       )}
 
-      {/* Table Controls (Search & Limit) */}
-      <div className="bg-base-100 p-4 rounded-xl shadow-sm border border-base-200 mb-6">
+      {/* Table Controls & Filter Section */}
+      <div className="bg-base-100 p-4 rounded-xl shadow-sm border border-base-200 mb-6 space-y-4">
+        {/* Existing Controls */}
         <TableControls 
           itemsPerPage={limit} 
           onItemsPerPageChange={handleLimitChange} 
           searchTerm={searchTerm} 
           onSearchChange={handleSearchChange} 
         />
+
+        {/* NEW: Class & Section Dropdowns + Search Button */}
+        <div className="flex flex-wrap items-end gap-4 border-t border-base-200 pt-4">
+          
+          <div className="form-control w-full sm:max-w-xs">
+            <label className="label">
+              <span className="label-text font-semibold text-base-content">Filter by Class</span>
+            </label>
+            <select 
+              className="select select-bordered w-full focus:select-primary"
+              value={filterClass}
+              onChange={(e) => {
+                setFilterClass(e.target.value);
+                setFilterSection(""); // Reset section automatically if class changes
+              }}
+            >
+              <option value="">All Classes</option>
+              {uniqueClasses.map((cls, idx) => (
+                <option key={idx} value={cls}>{cls}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="form-control w-full sm:max-w-xs">
+            <label className="label">
+              <span className="label-text font-semibold text-base-content">Filter by Section</span>
+            </label>
+            <select 
+              className="select select-bordered w-full focus:select-primary disabled:opacity-50"
+              value={filterSection}
+              onChange={(e) => setFilterSection(e.target.value)}
+              disabled={!filterClass}
+            >
+              <option value="">All Sections</option>
+              {filterAvailableSections.map((sec, idx) => (
+                <option key={idx} value={sec}>{sec}</option>
+              ))}
+            </select>
+          </div>
+
+          <button 
+            onClick={handleFilterSearch}
+            className="btn btn-primary"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            Search
+          </button>
+
+          {/* Optional: Clear Filter Button if filters are active */}
+          {(appliedFilterClass || appliedFilterSection) && (
+            <button 
+              onClick={() => {
+                setFilterClass("");
+                setFilterSection("");
+                setAppliedFilterClass("");
+                setAppliedFilterSection("");
+                setCurrentPage(1);
+              }}
+              className="btn btn-ghost text-error"
+            >
+              Clear Filters
+            </button>
+          )}
+
+        </div>
       </div>
 
       {/* Main Table Card */}
@@ -418,7 +521,6 @@ export default function Students() {
 
             <div className="flex gap-4">
               
-              {/* --- UPDATE: Class Dropdown --- */}
               <div className="form-control w-full">
                 <label className="label">
                   <span className="label-text font-semibold text-base-content">Class</span>
@@ -437,7 +539,6 @@ export default function Students() {
                 </select>
               </div>
 
-              {/* --- UPDATE: Section Dropdown --- */}
               <div className="form-control w-full">
                 <label className="label">
                   <span className="label-text font-semibold text-base-content">Section</span>
@@ -447,7 +548,7 @@ export default function Students() {
                   value={formData.section}
                   onChange={handleInputChange}
                   required
-                  disabled={!formData.studentClass} // Disable until a class is selected
+                  disabled={!formData.studentClass} 
                   className="select select-bordered w-full focus:select-primary disabled:opacity-50"
                 >
                   <option value="" disabled>Select Section</option>

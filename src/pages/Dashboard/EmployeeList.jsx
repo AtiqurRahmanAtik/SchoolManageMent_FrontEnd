@@ -30,6 +30,9 @@ export default function EmployeeList() {
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState(""); 
 
+  // --- NEW: Filter State ---
+  const [filterRole, setFilterRole] = useState("");
+
   // Edit Modal States
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -55,6 +58,11 @@ export default function EmployeeList() {
     { id: "contact", label: "Contact Info", className: "py-4 hidden lg:table-cell" },
     { id: "actions", label: "Actions", className: "py-4 text-right rounded-tr-box pr-8" }
   ];
+
+  // --- Extract Unique Roles ---
+  const uniqueRoles = Array.from(new Set(
+    employees?.map((emp) => emp.employeeRole || emp.role).filter(Boolean)
+  ));
 
   // Debounce the search term
   useEffect(() => {
@@ -177,11 +185,20 @@ export default function EmployeeList() {
     }
   };
 
-  // Local filtering in case backend search isn't fully covering it
+  // Local filtering combining Search and Role Filter
   const filteredEmployees = employees?.filter((employee) => {
+    // 1. Check Role filter
+    if (filterRole) {
+      const role = employee.employeeRole || employee.role;
+      if (role !== filterRole) return false;
+    }
+
+    // 2. Check general search term
     if (!searchTerm) return true;
+    
     const lowerSearch = searchTerm.toLowerCase();
     const empName = employee.employeeName || employee.name || `${employee.firstName} ${employee.lastName}`;
+    
     return (
       empName?.toLowerCase().includes(lowerSearch) ||
       employee.emailAddress?.toLowerCase().includes(lowerSearch) ||
@@ -206,7 +223,7 @@ export default function EmployeeList() {
         rightcontent={
           <Link to={"/add-employee"}> 
             <button className="btn btn-primary shadow-sm">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
               </svg>
               Add New Employee
@@ -234,14 +251,45 @@ export default function EmployeeList() {
         </div>
       )}
 
-      {/* Table Controls (Search & Limit) */}
-      <div className="bg-base-100 p-4 rounded-xl shadow-sm border border-base-200 mb-6">
+      {/* Table Controls (Search, Limit & Filter) */}
+      <div className="bg-base-100 p-4 rounded-xl shadow-sm border border-base-200 mb-6 space-y-4">
         <TableControls 
           itemsPerPage={limit} 
           onItemsPerPageChange={handleLimitChange} 
           searchTerm={searchTerm} 
           onSearchChange={handleSearchChange} 
         />
+
+        {/* --- NEW: Role Filter Dropdown --- */}
+        <div className="flex flex-wrap items-end gap-4 border-t border-base-200 pt-4">
+          <div className="form-control w-full sm:max-w-xs">
+            <label className="label">
+              <span className="label-text font-semibold text-base-content">Filter by Role</span>
+            </label>
+            <select 
+              className="select select-bordered w-full focus:select-primary"
+              value={filterRole}
+              onChange={(e) => setFilterRole(e.target.value)}
+            >
+              <option value="">All Roles</option>
+              {uniqueRoles.map((role, idx) => (
+                <option key={idx} value={role} className="capitalize">{role}</option>
+              ))}
+            </select>
+          </div>
+
+          {(filterRole || searchTerm) && (
+            <button 
+              onClick={() => {
+                setFilterRole("");
+                setSearchTerm("");
+              }}
+              className="btn btn-ghost text-error"
+            >
+              Clear Filters
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Main Table Card */}
@@ -270,7 +318,7 @@ export default function EmployeeList() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                       </svg>
                       <p className="text-lg font-medium">No employees found</p>
-                      <p className="text-sm">Try adjusting your search criteria or add new employees.</p>
+                      <p className="text-sm">Try adjusting your search criteria or filters, or add new employees.</p>
                     </div>
                   </td>
                 </tr>

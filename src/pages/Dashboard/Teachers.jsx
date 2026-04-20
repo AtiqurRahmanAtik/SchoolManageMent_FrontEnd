@@ -22,6 +22,9 @@ export default function Teachers() {
   // Local state for the "Show entries" dropdown and Search
   const [limit, setLimit] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
+  
+  // --- NEW: Filter State ---
+  const [filterSubject, setFilterSubject] = useState("");
 
   // Form & Add/Edit Modal States
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -53,6 +56,9 @@ export default function Teachers() {
     fetchTeachers(1, limit);
   }, [fetchTeachers, limit]);
 
+  // --- Extract Unique Subjects ---
+  const uniqueSubjects = Array.from(new Set(teachers?.map((t) => t.subject).filter(Boolean)));
+
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this teacher?")) {
       await removeTeacher(id);
@@ -70,7 +76,6 @@ export default function Teachers() {
 
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
-    // Add logic here if you want to trigger a search API call based on the term
   };
 
   const handleInputChange = (e) => {
@@ -149,6 +154,27 @@ export default function Teachers() {
       alert("Could not load teacher data for viewing.");
     }
   };
+
+  // --- Filtered Teachers Logic ---
+  const filteredTeachers = teachers?.filter((teacher) => {
+    // 1. General search logic
+    if (searchTerm) {
+      const lowerSearch = searchTerm.toLowerCase();
+      const matchesSearch = 
+        teacher.teacherName?.toLowerCase().includes(lowerSearch) ||
+        teacher.subject?.toLowerCase().includes(lowerSearch) ||
+        teacher.email?.toLowerCase().includes(lowerSearch);
+      
+      if (!matchesSearch) return false;
+    }
+
+    // 2. Subject filter logic
+    if (filterSubject && teacher.subject !== filterSubject) {
+      return false;
+    }
+
+    return true;
+  });
   
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto">
@@ -169,7 +195,7 @@ export default function Teachers() {
             }}
             className="btn btn-primary shadow-sm"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
             </svg>
             Add New Teacher
@@ -187,14 +213,45 @@ export default function Teachers() {
         </div>
       )}
 
-      {/* Table Controls (Search & Limit) */}
-      <div className="bg-base-100 p-4 rounded-xl shadow-sm border border-base-200 mb-6">
+      {/* Table Controls (Search, Limit & Filter) */}
+      <div className="bg-base-100 p-4 rounded-xl shadow-sm border border-base-200 mb-6 space-y-4">
         <TableControls 
           itemsPerPage={limit}
           onItemsPerPageChange={handleLimitChange}
           searchTerm={searchTerm}
           onSearchChange={handleSearchChange}
         />
+
+        {/* --- NEW: Subject Filter Dropdown --- */}
+        <div className="flex flex-wrap items-end gap-4 border-t border-base-200 pt-4">
+          <div className="form-control w-full sm:max-w-xs">
+            <label className="label">
+              <span className="label-text font-semibold text-base-content">Filter by Subject</span>
+            </label>
+            <select 
+              className="select select-bordered w-full focus:select-primary"
+              value={filterSubject}
+              onChange={(e) => setFilterSubject(e.target.value)}
+            >
+              <option value="">All Subjects</option>
+              {uniqueSubjects.map((subject, idx) => (
+                <option key={idx} value={subject}>{subject}</option>
+              ))}
+            </select>
+          </div>
+
+          {(filterSubject || searchTerm) && (
+            <button 
+              onClick={() => {
+                setFilterSubject("");
+                setSearchTerm("");
+              }}
+              className="btn btn-ghost text-error"
+            >
+              Clear Filters
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Main Table Card */}
@@ -214,21 +271,21 @@ export default function Teachers() {
             <tbody>
               {loading ? (
                 <SkeletonLoader />
-              ) : teachers?.length === 0 ? (
+              ) : filteredTeachers?.length === 0 ? (
                 <tr>
                   <td colSpan={tableHeaders.length} className="py-12 text-center">
-                    <MtableLoading data={teachers} />
+                    <MtableLoading data={filteredTeachers} />
                     <div className="flex flex-col items-center justify-center text-base-content/50 mt-[-40px]">
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                       </svg>
                       <p className="text-lg font-medium">No teachers found</p>
-                      <p className="text-sm">Click "Add New Teacher" to create one.</p>
+                      <p className="text-sm">Try adjusting your filters or click "Add New Teacher" to create one.</p>
                     </div>
                   </td>
                 </tr>
               ) : (
-                teachers?.map((teacher) => (
+                filteredTeachers?.map((teacher) => (
                   <tr key={teacher._id} className="hover">
 
                     {/* Teacher Profile Column */}
