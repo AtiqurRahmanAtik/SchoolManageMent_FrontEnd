@@ -10,28 +10,28 @@ export const useStudentAttendance = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Added token here to securely call your authenticated backend routes
   const { branch, token } = useAuth(); 
 
   // Helper function to build query parameters
   const buildQueryParams = (page, limit, filters = {}) => {
     const params = new URLSearchParams({ page, limit });
+    
+    if (filters.search) params.append("search", filters.search);
     if (filters.date) params.append("date", filters.date);
     if (filters.studentClass) params.append("studentClass", filters.studentClass);
     if (filters.section) params.append("section", filters.section);
+    
     return params.toString();
   };
 
-  // GET: All Student Attendances (Paginated & Searchable via Filters)
+  // GET: All Student Attendances
   const fetchAllStudentAttendances = useCallback(async (page = 1, limit = 10, filters = {}) => {
     setLoading(true);
     setError(null);
     try {
       const queryString = buildQueryParams(page, limit, filters);
       const response = await fetch(`${API}/?${queryString}`, {
-        headers: {
-          "Authorization": `Bearer ${token}` // Required by your backend middleware
-        }
+        headers: { "Authorization": `Bearer ${token}` }
       });
       const result = await response.json();
       
@@ -46,18 +46,15 @@ export const useStudentAttendance = () => {
       setLoading(false);
     }
   }, [token]);
-
   
-  // GET: All Student Attendances by Branch (Paginated & Searchable via Filters)
+  // GET: All Student Attendances by Branch
   const fetchStudentAttendancesByBranch = useCallback(async (targetBranch = branch, page = 1, limit = 10, filters = {}) => {
     setLoading(true);
     setError(null);
     try {
       const queryString = buildQueryParams(page, limit, filters);
       const response = await fetch(`${API}/${targetBranch}/get-all?${queryString}`, {
-        headers: {
-          "Authorization": `Bearer ${token}` // Required by your backend middleware
-        }
+        headers: { "Authorization": `Bearer ${token}` }
       });
       const result = await response.json();
       
@@ -73,15 +70,13 @@ export const useStudentAttendance = () => {
     }
   }, [branch, token]);
 
-  // GET: Single Student Attendance Details By ID
+  // GET: Single
   const fetchStudentAttendanceById = useCallback(async (id) => {
     setLoading(true);
     setError(null);
     try {
       const response = await fetch(`${API}/get-id/${id}`, {
-        headers: {
-          "Authorization": `Bearer ${token}`
-        }
+        headers: { "Authorization": `Bearer ${token}` }
       });
       const result = await response.json();
       
@@ -96,13 +91,12 @@ export const useStudentAttendance = () => {
     }
   }, [token]);
 
-  // POST: Create a new Student Attendance
+  // POST: Create
   const createStudentAttendance = useCallback(async (studentAttendanceData) => {
     setLoading(true);
     setError(null);
     try {
       const payload = { ...studentAttendanceData, branch: studentAttendanceData.branch || branch };
-      
       const response = await fetch(`${API}/post`, {
         method: "POST",
         headers: { 
@@ -114,7 +108,6 @@ export const useStudentAttendance = () => {
       
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || "Failed to create student attendance");
-      
       return result;
     } catch (err) {
       setError(err.message);
@@ -124,7 +117,7 @@ export const useStudentAttendance = () => {
     }
   }, [branch, token]);
 
-  // PUT: Update a Student Attendance
+  // PUT: Update
   const updateStudentAttendance = useCallback(async (id, studentAttendanceData) => {
     setLoading(true);
     setError(null);
@@ -140,7 +133,6 @@ export const useStudentAttendance = () => {
       
       const result = await response.json();
       if (!response.ok) throw new Error(result.message || result.error || "Failed to update student attendance");
-      
       return result;
     } catch (err) {
       setError(err.message);
@@ -150,7 +142,7 @@ export const useStudentAttendance = () => {
     }
   }, [token]);
 
-  // DELETE: Remove a Student Attendance
+  // DELETE: Remove
   const removeStudentAttendance = useCallback(async (id) => {
     setLoading(true);
     setError(null);
@@ -162,7 +154,6 @@ export const useStudentAttendance = () => {
       
       const result = await response.json();
       if (!response.ok) throw new Error(result.message || result.error || "Failed to delete student attendance");
-      
       return result;
     } catch (err) {
       setError(err.message);

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useEmployeeAttendance } from '../../Hook/useEmployeeAttendance'; // Adjust path if needed
+import useEmployeeRole from '../../Hook/useEmployeeRole'; // Imported the Role Hook
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Link } from 'react-router-dom';
@@ -21,6 +22,12 @@ export default function EmployeeAttendanceRecord() {
     fetchEmployeeAttendancesByBranch
   } = useEmployeeAttendance();
 
+  // --- Employee Role Hook (Added for Dynamic Dropdown) ---
+  const {
+    employeeRoles,
+    getEmployeeRolesByBranch
+  } = useEmployeeRole();
+
   // Local state for table controls
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(10);
@@ -41,6 +48,12 @@ export default function EmployeeAttendanceRecord() {
     { id: "roleInfo", label: "Role & Mobile No", className: "py-4 hidden md:table-cell" },
     { id: "status", label: "Status", className: "py-4 rounded-tr-box pr-8 text-right" }
   ];
+
+  // Fetch dynamic roles for the dropdown on component mount
+  useEffect(() => {
+    // Fetching up to 100 roles to ensure the dropdown is fully populated
+    getEmployeeRolesByBranch(1, 100); 
+  }, [getEmployeeRolesByBranch]);
 
   // Debounce the search term
   useEffect(() => {
@@ -149,7 +162,7 @@ export default function EmployeeAttendanceRecord() {
           </span>
         }
         rightcontent={
-          <Link to={"/take-employee-attendance"}>
+          <Link to={"/attendance/employee"}>
             <button className="btn btn-primary shadow-sm">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
@@ -210,7 +223,7 @@ export default function EmployeeAttendanceRecord() {
             />
           </div>
 
-          {/* Role Filter */}
+          {/* Dynamic Role Filter */}
           <div className="form-control w-full sm:max-w-xs">
             <label className="label">
               <span className="label-text font-semibold text-base-content">Filter by Role</span>
@@ -221,11 +234,12 @@ export default function EmployeeAttendanceRecord() {
               onChange={(e) => setFilterRole(e.target.value)}
             >
               <option value="">All Roles</option>
-              <option value="Admin">Admin</option>
-              <option value="Teacher">Teacher</option>
-              <option value="Staff">Staff</option>
-              <option value="Librarian">Librarian</option>
-              <option value="Accountant">Accountant</option>
+              {/* Dynamically mapping roles from the backend */}
+              {employeeRoles?.map((role) => (
+                <option key={role._id} value={role.roleName || role.name}>
+                  {role.roleName || role.name}
+                </option>
+              ))}
             </select>
           </div>
 
@@ -294,13 +308,16 @@ export default function EmployeeAttendanceRecord() {
                   const employeePhoto = record.employeePhoto || record.employee?.employeePhoto;
                   const employeeRole = record.employeeRole || record.employee?.employeeRole || "N/A";
                   const mobileNo = record.employeeMobileNo || record.employee?.mobileNo || record.employee?.employeeMobileNo || "N/A";
-                  const regNo = record.registrationNo || record.employee?.registrationNo || record.employee?.employeeId || "N/A";
+                  const regNo = record.registrationNo || record.employee?.registrationNo || record.employee?.employeeId || record.employeeId || "N/A";
                   
+
                   // Safe fallback to match backend date logic
                   const attendanceDate = record.date || record.attendanceDate || record.createdAt;
                   
                   // Get initials for avatar (e.g., "MI" for "Mitu")
                   const initials = employeeName.substring(0, 2).toUpperCase();
+
+
 
                   return (
                     <tr key={record._id} className="hover bg-base-100 shadow-sm rounded-xl">
@@ -321,7 +338,7 @@ export default function EmployeeAttendanceRecord() {
                           </div>
                           <div>
                             <div className="font-semibold text-base text-base-content">{employeeName}</div>
-                            <div className="text-xs text-base-content/60 mt-0.5">Reg No: {regNo}</div>
+                            <div className="text-xs text-base-content/60 mt-0.5">Emp No: {regNo}</div>
                           </div>
                         </div>
                       </td>

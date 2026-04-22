@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import useEmployeeAttendance from '../../Hook/useEmployeeAttendance'; 
 import useEmployees from '../../Hook/useEmployees'; // Assuming you have a hook to fetch employees
+import useEmployeeRole from '../../Hook/useEmployeeRole'; // Imported the Role Hook
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Link } from 'react-router-dom';
@@ -29,6 +30,12 @@ export default function EmployeeAttendance() {
     fetchEmployeesByBranch,
     loading: employeesLoading
   } = useEmployees();
+
+  // --- Employee Role Hook (Added for Dynamic Dropdown) ---
+  const {
+    employeeRoles,
+    getEmployeeRolesByBranch
+  } = useEmployeeRole();
 
   // Local state for table controls
   const [currentPage, setCurrentPage] = useState(1);
@@ -73,6 +80,11 @@ export default function EmployeeAttendance() {
     { id: "actions", label: "Action", className: "py-4 text-center rounded-tr-box font-semibold text-base-content pr-8" }
   ];
 
+  // Fetch dynamic roles for the dropdown on component mount
+  useEffect(() => {
+    getEmployeeRolesByBranch(1, 100); 
+  }, [getEmployeeRolesByBranch]);
+
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearch(searchTerm);
@@ -93,9 +105,6 @@ export default function EmployeeAttendance() {
       employeeRole: appliedFilterRole
     });
   }, [fetchEmployeesByBranch, fetchEmployeeAttendancesByBranch, currentPage, limit, debouncedSearch, appliedFilterDate, appliedFilterRole]);
-
-  // Extract unique roles for the filter dropdown
-  const uniqueRoles = Array.from(new Set(employees?.map((e) => e.employeeRole || e.role).filter(Boolean)));
 
   const handlePageChange = (newPage) => setCurrentPage(newPage);
 
@@ -355,8 +364,11 @@ export default function EmployeeAttendance() {
               onChange={(e) => setFilterRole(e.target.value)}
             >
               <option value="">All Roles</option>
-              {uniqueRoles.map((role, idx) => (
-                <option key={idx} value={role}>{role}</option>
+              {/* Dynamically mapped roles from useEmployeeRole hook */}
+              {employeeRoles?.map((role) => (
+                <option key={role._id} value={role.roleName || role.name}>
+                  {role.roleName || role.name}
+                </option>
               ))}
             </select>
           </div>

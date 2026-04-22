@@ -13,7 +13,6 @@ import SkeletonLoader from '../../components/SkeletonLoader';
 import MtableLoading from '../../components library/MtableLoading'; 
 
 export default function StudentsAttendanceRecord() {
-  // --- Attendance Hook ---
   const {
     studentAttendances,
     pagination,
@@ -22,25 +21,21 @@ export default function StudentsAttendanceRecord() {
     fetchStudentAttendancesByBranch
   } = useStudentAttendance();
 
-  // --- Section Hook (To maintain the same filter structure) ---
   const { sections, getSections } = useSection();
 
-  // Local state for table controls
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState(""); 
 
-  // --- Filter States ---
   const [filterClass, setFilterClass] = useState("");
   const [filterSection, setFilterSection] = useState("");
-  const [filterDate, setFilterDate] = useState(""); // New date filter state
+  const [filterDate, setFilterDate] = useState(""); 
   
   const [appliedFilterClass, setAppliedFilterClass] = useState("");
   const [appliedFilterSection, setAppliedFilterSection] = useState("");
-  const [appliedFilterDate, setAppliedFilterDate] = useState(""); // New applied date filter state
+  const [appliedFilterDate, setAppliedFilterDate] = useState(""); 
 
-  // --- Dynamic Table Headers ---
   const tableHeaders = [
     { id: "student", label: "Student Profile", className: "py-4 rounded-tl-box" },
     { id: "date", label: "Date", className: "py-4 hidden sm:table-cell" },
@@ -48,12 +43,10 @@ export default function StudentsAttendanceRecord() {
     { id: "status", label: "Status", className: "py-4 rounded-tr-box pr-8 text-right" }
   ];
 
-  // Fetch sections for the dropdowns on component mount
   useEffect(() => {
     getSections(1, 1000); 
   }, [getSections]);
 
-  // Debounce the search term
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearch(searchTerm);
@@ -63,19 +56,16 @@ export default function StudentsAttendanceRecord() {
     return () => clearTimeout(handler);
   }, [searchTerm]);
 
-  // Fetch student attendances (Backend Integration for Search & Filters)
   useEffect(() => {
     const filters = {};
     if (appliedFilterClass) filters.studentClass = appliedFilterClass;
     if (appliedFilterSection) filters.section = appliedFilterSection;
-    if (appliedFilterDate) filters.date = appliedFilterDate; // Apply date filter
-    if (debouncedSearch) filters.search = debouncedSearch; // Passed to hook, ensure hook appends it to URL if supported
+    if (appliedFilterDate) filters.date = appliedFilterDate; 
+    if (debouncedSearch) filters.search = debouncedSearch; 
 
-    // undefined passes the default branch inside the hook
     fetchStudentAttendancesByBranch(undefined, currentPage, limit, filters);
   }, [fetchStudentAttendancesByBranch, currentPage, limit, debouncedSearch, appliedFilterClass, appliedFilterSection, appliedFilterDate]);
 
-  // --- Dropdown Logic Extraction ---
   const uniqueClasses = Array.from(new Set(sections?.map((s) => s.className).filter(Boolean)));
   
   const filterAvailableSections = Array.from(new Set(sections
@@ -83,7 +73,6 @@ export default function StudentsAttendanceRecord() {
     .map((s) => s.sectionName)
     .filter(Boolean)));
 
-  // Pagination & Control Handlers
   const handlePageChange = (newPage) => setCurrentPage(newPage);
 
   const handleLimitChange = (e) => {
@@ -97,22 +86,19 @@ export default function StudentsAttendanceRecord() {
   const handleFilterSearch = () => {
     setAppliedFilterClass(filterClass);
     setAppliedFilterSection(filterSection);
-    setAppliedFilterDate(filterDate); // Apply the date state to trigger the API call
+    setAppliedFilterDate(filterDate); 
     setCurrentPage(1);
   };
 
-  // Helper function to format dates nicely
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";
     const options = { year: 'numeric', month: 'short', day: 'numeric' };
     return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
-  // Helper function to render status badges dynamically & safely based on the backend model
   const renderStatusBadge = (record) => {
     if (!record) return <div className="badge badge-ghost font-medium px-4 py-3">Unknown</div>;
 
-    // 1. Primary Check: Based on the updated backend 'attendanceStatus' field
     const statusValue = record.attendanceStatus || record.status;
 
     if (typeof statusValue === 'string') {
@@ -129,7 +115,6 @@ export default function StudentsAttendanceRecord() {
       return <div className="badge badge-ghost font-medium px-4 py-3 capitalize">{statusValue}</div>;
     }
 
-    // 2. Legacy check: If the API provides boolean fields for present/absent directly
     if (record.present === true) {
       return <div className="badge badge-success text-white font-medium px-4 py-3">Present</div>;
     }
@@ -137,7 +122,6 @@ export default function StudentsAttendanceRecord() {
       return <div className="badge badge-error text-white font-medium px-4 py-3">Absent</div>;
     }
 
-    // 3. Legacy check: Fallback for boolean status
     if (typeof statusValue === 'boolean') {
       return (
         <div className={`badge ${statusValue ? 'badge-success' : 'badge-error'} text-white font-medium px-4 py-3`}>
@@ -153,7 +137,6 @@ export default function StudentsAttendanceRecord() {
     <div className="p-4 md:p-8 max-w-7xl mx-auto font-sans relative">
       <ToastContainer position="top-right" autoClose={3000} />
       
-      {/* Header Section */}
       <Mtitle 
         title="Student Attendance Records" 
         middlecontent={
@@ -162,7 +145,7 @@ export default function StudentsAttendanceRecord() {
           </span>
         }
         rightcontent={
-          <Link to={"/take-attendance"}>
+          <Link to={"/attendance/student"}>
             <button className="btn btn-primary shadow-sm">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
@@ -173,7 +156,6 @@ export default function StudentsAttendanceRecord() {
         }
       />
 
-      {/* Error Alert */}
       {error && (
         <div className="alert alert-error shadow-lg mb-6">
           <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current flex-shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
@@ -199,9 +181,7 @@ export default function StudentsAttendanceRecord() {
         </div>
       )}
 
-      {/* Table Controls & Filter Section */}
       <div className="bg-base-100 p-4 rounded-xl shadow-sm border border-base-200 mb-6 space-y-4">
-        {/* Existing Controls */}
         <TableControls 
           itemsPerPage={limit} 
           onItemsPerPageChange={handleLimitChange} 
@@ -209,9 +189,7 @@ export default function StudentsAttendanceRecord() {
           onSearchChange={handleSearchChange} 
         />
 
-        {/* Class, Section & Date Dropdowns/Inputs + Search Button */}
         <div className="flex flex-wrap items-end gap-4 border-t border-base-200 pt-4">
-          
           <div className="form-control w-full sm:max-w-xs">
             <label className="label">
               <span className="label-text font-semibold text-base-content">Filter by Date</span>
@@ -270,7 +248,6 @@ export default function StudentsAttendanceRecord() {
             Search
           </button>
 
-          {/* Optional: Clear Filter Button if filters are active */}
           {(appliedFilterClass || appliedFilterSection || appliedFilterDate) && (
             <button 
               onClick={() => {
@@ -287,11 +264,9 @@ export default function StudentsAttendanceRecord() {
               Clear Filters
             </button>
           )}
-
         </div>
       </div>
 
-      {/* Main Table Card */}
       <div className="card bg-base-100 shadow-xl border border-base-200">
         <div className="overflow-x-auto rounded-box">
           <table className="table table-zebra w-full">
@@ -323,7 +298,6 @@ export default function StudentsAttendanceRecord() {
                 </tr>
               ) : (
                 studentAttendances?.map((record) => {
-                  // Fallbacks to handle cases where student data is populated vs flat in your API payload
                   const studentName = record.studentName || record.student?.studentName || "Unknown Student";
                   const studentPhoto = record.studentPhoto || record.student?.studentPhoto || `https://ui-avatars.com/api/?name=${encodeURIComponent(studentName)}&background=random`;
                   const studentClass = record.studentClass || record.student?.studentClass || "N/A";
@@ -332,8 +306,6 @@ export default function StudentsAttendanceRecord() {
 
                   return (
                     <tr key={record._id} className="hover">
-                      
-                      {/* Student Profile Column */}
                       <td className="py-4">
                         <div className="flex items-center space-x-3">
                           <div className="avatar">
@@ -351,26 +323,18 @@ export default function StudentsAttendanceRecord() {
                           </div>
                         </div>
                       </td>
-
-                      {/* Date Column */}
                       <td className="py-4 hidden sm:table-cell">
                         <div className="text-sm font-medium">
                           {formatDate(record.date)}
                         </div>
                       </td>
-
-                      {/* Class & Section Column */}
                       <td className="py-4 hidden md:table-cell">
                         <div className="text-sm font-medium">{studentClass}</div>
                         <div className="text-xs text-base-content/60">Sec: {section}</div>
                       </td>
-
-                      {/* Status Column */}
                       <td className="py-4 pr-8 text-right">
-                        {/* We now pass the entire record object here */}
                         {renderStatusBadge(record)}
                       </td>
-
                     </tr>
                   )
                 })
@@ -380,7 +344,6 @@ export default function StudentsAttendanceRecord() {
         </div>
       </div>
 
-      {/* Pagination Container */}
       {!loading && pagination && pagination.totalPages > 1 && (
         <div className="flex justify-center md:justify-end mt-6">
           <div className="join shadow-sm border border-base-200 rounded-lg bg-base-100">
@@ -394,7 +357,6 @@ export default function StudentsAttendanceRecord() {
           </div>
         </div>
       )}
-
     </div>
   );
 }
