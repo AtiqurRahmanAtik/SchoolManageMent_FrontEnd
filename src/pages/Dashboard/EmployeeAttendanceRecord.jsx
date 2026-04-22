@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import useStudentAttendance from '../../Hook/useStudentAttendance'; // Adjust path if needed
-import useSection from '../../Hook/useSection'; // Imported to keep the exact filter structure
+import { useEmployeeAttendance } from '../../Hook/useEmployeeAttendance'; // Adjust path if needed
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Link } from 'react-router-dom';
@@ -12,18 +11,15 @@ import Pagination from '../../components/Pagination';
 import SkeletonLoader from '../../components/SkeletonLoader'; 
 import MtableLoading from '../../components library/MtableLoading'; 
 
-export default function StudentsAttendanceRecord() {
+export default function EmployeeAttendanceRecord() {
   // --- Attendance Hook ---
   const {
-    studentAttendances,
+    employeeAttendances,
     pagination,
     loading,
     error,
-    fetchStudentAttendancesByBranch
-  } = useStudentAttendance();
-
-  // --- Section Hook (To maintain the same filter structure) ---
-  const { sections, getSections } = useSection();
+    fetchEmployeeAttendancesByBranch
+  } = useEmployeeAttendance();
 
   // Local state for table controls
   const [currentPage, setCurrentPage] = useState(1);
@@ -32,26 +28,19 @@ export default function StudentsAttendanceRecord() {
   const [debouncedSearch, setDebouncedSearch] = useState(""); 
 
   // --- Filter States ---
-  const [filterClass, setFilterClass] = useState("");
-  const [filterSection, setFilterSection] = useState("");
-  const [filterDate, setFilterDate] = useState(""); // New date filter state
+  const [filterRole, setFilterRole] = useState("");
+  const [filterDate, setFilterDate] = useState(""); 
   
-  const [appliedFilterClass, setAppliedFilterClass] = useState("");
-  const [appliedFilterSection, setAppliedFilterSection] = useState("");
-  const [appliedFilterDate, setAppliedFilterDate] = useState(""); // New applied date filter state
+  const [appliedFilterRole, setAppliedFilterRole] = useState("");
+  const [appliedFilterDate, setAppliedFilterDate] = useState(""); 
 
   // --- Dynamic Table Headers ---
   const tableHeaders = [
-    { id: "student", label: "Student Profile", className: "py-4 rounded-tl-box" },
-    { id: "date", label: "Date", className: "py-4 hidden sm:table-cell" },
-    { id: "classInfo", label: "Class & Section", className: "py-4 hidden md:table-cell" },
+    { id: "employee", label: "Employee Profile", className: "py-4 rounded-tl-box" },
+    { id: "date", label: "Date", className: "py-4" }, 
+    { id: "roleInfo", label: "Role & Mobile No", className: "py-4 hidden md:table-cell" },
     { id: "status", label: "Status", className: "py-4 rounded-tr-box pr-8 text-right" }
   ];
-
-  // Fetch sections for the dropdowns on component mount
-  useEffect(() => {
-    getSections(1, 1000); 
-  }, [getSections]);
 
   // Debounce the search term
   useEffect(() => {
@@ -63,25 +52,24 @@ export default function StudentsAttendanceRecord() {
     return () => clearTimeout(handler);
   }, [searchTerm]);
 
-  // Fetch student attendances (Backend Integration for Search & Filters)
+  // Fetch employee attendances (Backend Integration for Search & Filters)
   useEffect(() => {
     const filters = {};
-    if (appliedFilterClass) filters.studentClass = appliedFilterClass;
-    if (appliedFilterSection) filters.section = appliedFilterSection;
-    if (appliedFilterDate) filters.date = appliedFilterDate; // Apply date filter
-    if (debouncedSearch) filters.search = debouncedSearch; // Passed to hook, ensure hook appends it to URL if supported
+    
+    // Explicitly mapping to what the hook expects
+    if (appliedFilterRole) {
+      filters.employeeRole = appliedFilterRole;
+    }
+    if (appliedFilterDate) {
+      filters.date = appliedFilterDate; 
+    }
+    if (debouncedSearch) {
+      filters.search = debouncedSearch; 
+    }
 
-    // undefined passes the default branch inside the hook
-    fetchStudentAttendancesByBranch(undefined, currentPage, limit, filters);
-  }, [fetchStudentAttendancesByBranch, currentPage, limit, debouncedSearch, appliedFilterClass, appliedFilterSection, appliedFilterDate]);
-
-  // --- Dropdown Logic Extraction ---
-  const uniqueClasses = Array.from(new Set(sections?.map((s) => s.className).filter(Boolean)));
-  
-  const filterAvailableSections = Array.from(new Set(sections
-    ?.filter((s) => !filterClass || s.className === filterClass)
-    .map((s) => s.sectionName)
-    .filter(Boolean)));
+    // Fetch the data whenever page, limit, search, or applied filters change
+    fetchEmployeeAttendancesByBranch(undefined, currentPage, limit, filters);
+  }, [fetchEmployeeAttendancesByBranch, currentPage, limit, debouncedSearch, appliedFilterRole, appliedFilterDate]);
 
   // Pagination & Control Handlers
   const handlePageChange = (newPage) => setCurrentPage(newPage);
@@ -95,10 +83,9 @@ export default function StudentsAttendanceRecord() {
   const handleSearchChange = (e) => setSearchTerm(e.target.value);
 
   const handleFilterSearch = () => {
-    setAppliedFilterClass(filterClass);
-    setAppliedFilterSection(filterSection);
-    setAppliedFilterDate(filterDate); // Apply the date state to trigger the API call
-    setCurrentPage(1);
+    setAppliedFilterRole(filterRole);
+    setAppliedFilterDate(filterDate); 
+    setCurrentPage(1); // Reset to page 1 on new filter
   };
 
   // Helper function to format dates nicely
@@ -108,45 +95,45 @@ export default function StudentsAttendanceRecord() {
     return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
-  // Helper function to render status badges dynamically & safely based on the backend model
+  // Helper function to render status badges dynamically
   const renderStatusBadge = (record) => {
     if (!record) return <div className="badge badge-ghost font-medium px-4 py-3">Unknown</div>;
 
-    // 1. Primary Check: Based on the updated backend 'attendanceStatus' field
     const statusValue = record.attendanceStatus || record.status;
 
     if (typeof statusValue === 'string') {
       const statusFormatted = statusValue.toLowerCase();
       if (statusFormatted === 'present') {
-        return <div className="badge badge-success text-white font-medium px-4 py-3">Present</div>;
+        return <div className="badge badge-success text-white font-medium px-6 py-3 rounded-full">Present</div>;
       }
       if (statusFormatted === 'absent') {
-        return <div className="badge badge-error text-white font-medium px-4 py-3">Absent</div>;
+        return <div className="badge badge-error text-white font-medium px-6 py-3 rounded-full">Absent</div>;
       }
       if (statusFormatted === 'late') {
-        return <div className="badge badge-warning text-white font-medium px-4 py-3">Late</div>;
+        return <div className="badge badge-warning text-white font-medium px-6 py-3 rounded-full">Late</div>;
       }
-      return <div className="badge badge-ghost font-medium px-4 py-3 capitalize">{statusValue}</div>;
+      return <div className="badge badge-ghost font-medium px-6 py-3 capitalize rounded-full">{statusValue}</div>;
     }
 
-    // 2. Legacy check: If the API provides boolean fields for present/absent directly
-    if (record.present === true) {
-      return <div className="badge badge-success text-white font-medium px-4 py-3">Present</div>;
-    }
-    if (record.absent === true) {
-      return <div className="badge badge-error text-white font-medium px-4 py-3">Absent</div>;
-    }
+    if (record.present === true) return <div className="badge badge-success text-white font-medium px-6 py-3 rounded-full">Present</div>;
+    if (record.absent === true) return <div className="badge badge-error text-white font-medium px-6 py-3 rounded-full">Absent</div>;
 
-    // 3. Legacy check: Fallback for boolean status
     if (typeof statusValue === 'boolean') {
       return (
-        <div className={`badge ${statusValue ? 'badge-success' : 'badge-error'} text-white font-medium px-4 py-3`}>
+        <div className={`badge ${statusValue ? 'badge-success' : 'badge-error'} text-white font-medium px-6 py-3 rounded-full`}>
           {statusValue ? 'Present' : 'Absent'}
         </div>
       );
     }
 
-    return <div className="badge badge-ghost font-medium px-4 py-3 capitalize">Not Marked</div>;
+    return <div className="badge badge-ghost font-medium px-6 py-3 capitalize rounded-full">Not Marked</div>;
+  };
+
+  // Helper for generating initials placeholder backgrounds dynamically based on UI
+  const getAvatarColor = (name) => {
+    const colors = ["bg-green-200 text-green-800", "bg-emerald-600 text-white", "bg-base-200 text-base-content"];
+    const index = name ? name.charCodeAt(0) % colors.length : 2;
+    return colors[index];
   };
 
   return (
@@ -155,14 +142,14 @@ export default function StudentsAttendanceRecord() {
       
       {/* Header Section */}
       <Mtitle 
-        title="Student Attendance Records" 
+        title="Employee Attendance Records" 
         middlecontent={
           <span className="text-sm text-base-content/70 hidden md:inline-block">
-            Manage and view daily student attendance history.
+            Manage and view daily employee attendance history.
           </span>
         }
         rightcontent={
-          <Link to={"/take-attendance"}>
+          <Link to={"/take-employee-attendance"}>
             <button className="btn btn-primary shadow-sm">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
@@ -186,11 +173,10 @@ export default function StudentsAttendanceRecord() {
           <button 
             onClick={() => {
               const filters = {};
-              if (appliedFilterClass) filters.studentClass = appliedFilterClass;
-              if (appliedFilterSection) filters.section = appliedFilterSection;
+              if (appliedFilterRole) filters.employeeRole = appliedFilterRole;
               if (appliedFilterDate) filters.date = appliedFilterDate;
               if (debouncedSearch) filters.search = debouncedSearch;
-              fetchStudentAttendancesByBranch(undefined, currentPage, limit, filters);
+              fetchEmployeeAttendancesByBranch(undefined, currentPage, limit, filters);
             }}
             className="btn btn-sm btn-outline border-white text-white hover:bg-white hover:text-error"
           >
@@ -201,7 +187,6 @@ export default function StudentsAttendanceRecord() {
 
       {/* Table Controls & Filter Section */}
       <div className="bg-base-100 p-4 rounded-xl shadow-sm border border-base-200 mb-6 space-y-4">
-        {/* Existing Controls */}
         <TableControls 
           itemsPerPage={limit} 
           onItemsPerPageChange={handleLimitChange} 
@@ -209,9 +194,10 @@ export default function StudentsAttendanceRecord() {
           onSearchChange={handleSearchChange} 
         />
 
-        {/* Class, Section & Date Dropdowns/Inputs + Search Button */}
+        {/* Filters + Search Button */}
         <div className="flex flex-wrap items-end gap-4 border-t border-base-200 pt-4">
           
+          {/* Date Filter */}
           <div className="form-control w-full sm:max-w-xs">
             <label className="label">
               <span className="label-text font-semibold text-base-content">Filter by Date</span>
@@ -224,39 +210,22 @@ export default function StudentsAttendanceRecord() {
             />
           </div>
 
+          {/* Role Filter */}
           <div className="form-control w-full sm:max-w-xs">
             <label className="label">
-              <span className="label-text font-semibold text-base-content">Filter by Class</span>
+              <span className="label-text font-semibold text-base-content">Filter by Role</span>
             </label>
             <select 
               className="select select-bordered w-full focus:select-primary"
-              value={filterClass}
-              onChange={(e) => {
-                setFilterClass(e.target.value);
-                setFilterSection(""); 
-              }}
+              value={filterRole}
+              onChange={(e) => setFilterRole(e.target.value)}
             >
-              <option value="">All Classes</option>
-              {uniqueClasses.map((cls, idx) => (
-                <option key={idx} value={cls}>{cls}</option>
-              ))}
-            </select>
-          </div>
-
-          <div className="form-control w-full sm:max-w-xs">
-            <label className="label">
-              <span className="label-text font-semibold text-base-content">Filter by Section</span>
-            </label>
-            <select 
-              className="select select-bordered w-full focus:select-primary disabled:opacity-50"
-              value={filterSection}
-              onChange={(e) => setFilterSection(e.target.value)}
-              disabled={!filterClass}
-            >
-              <option value="">All Sections</option>
-              {filterAvailableSections.map((sec, idx) => (
-                <option key={idx} value={sec}>{sec}</option>
-              ))}
+              <option value="">All Roles</option>
+              <option value="Admin">Admin</option>
+              <option value="Teacher">Teacher</option>
+              <option value="Staff">Staff</option>
+              <option value="Librarian">Librarian</option>
+              <option value="Accountant">Accountant</option>
             </select>
           </div>
 
@@ -270,15 +239,12 @@ export default function StudentsAttendanceRecord() {
             Search
           </button>
 
-          {/* Optional: Clear Filter Button if filters are active */}
-          {(appliedFilterClass || appliedFilterSection || appliedFilterDate) && (
+          {(appliedFilterRole || appliedFilterDate) && (
             <button 
               onClick={() => {
-                setFilterClass("");
-                setFilterSection("");
+                setFilterRole("");
                 setFilterDate("");
-                setAppliedFilterClass("");
-                setAppliedFilterSection("");
+                setAppliedFilterRole("");
                 setAppliedFilterDate("");
                 setCurrentPage(1);
               }}
@@ -294,11 +260,11 @@ export default function StudentsAttendanceRecord() {
       {/* Main Table Card */}
       <div className="card bg-base-100 shadow-xl border border-base-200">
         <div className="overflow-x-auto rounded-box">
-          <table className="table table-zebra w-full">
+          <table className="table w-full border-separate border-spacing-y-2 px-2">
             <thead className="bg-base-200 text-base-content text-sm">
               <tr>
                 {tableHeaders.map((header) => (
-                  <th key={header.id} className={header.className}>
+                  <th key={header.id} className={`bg-base-200 border-none ${header.className}`}>
                     {header.label}
                   </th>
                 ))}
@@ -308,10 +274,10 @@ export default function StudentsAttendanceRecord() {
             <tbody>
               {loading ? (
                 <SkeletonLoader />
-              ) : studentAttendances?.length === 0 ? (
+              ) : employeeAttendances?.length === 0 ? (
                 <tr>
-                  <td colSpan={tableHeaders.length} className="py-12 text-center">
-                    <MtableLoading data={studentAttendances} />
+                  <td colSpan={tableHeaders.length} className="py-12 text-center bg-base-100">
+                    <MtableLoading data={employeeAttendances} />
                     <div className="flex flex-col items-center justify-center text-base-content/50 mt-[-40px]">
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -322,52 +288,59 @@ export default function StudentsAttendanceRecord() {
                   </td>
                 </tr>
               ) : (
-                studentAttendances?.map((record) => {
-                  // Fallbacks to handle cases where student data is populated vs flat in your API payload
-                  const studentName = record.studentName || record.student?.studentName || "Unknown Student";
-                  const studentPhoto = record.studentPhoto || record.student?.studentPhoto || `https://ui-avatars.com/api/?name=${encodeURIComponent(studentName)}&background=random`;
-                  const studentClass = record.studentClass || record.student?.studentClass || "N/A";
-                  const section = record.section || record.student?.section || "N/A";
-                  const regNo = record.registrationNo || record.student?.registrationNo || "N/A";
+                employeeAttendances?.map((record) => {
+                  // Fallbacks for flat vs populated API payloads
+                  const employeeName = record.employeeName || record.employee?.employeeName || "Unknown Employee";
+                  const employeePhoto = record.employeePhoto || record.employee?.employeePhoto;
+                  const employeeRole = record.employeeRole || record.employee?.employeeRole || "N/A";
+                  const mobileNo = record.employeeMobileNo || record.employee?.mobileNo || record.employee?.employeeMobileNo || "N/A";
+                  const regNo = record.registrationNo || record.employee?.registrationNo || record.employee?.employeeId || "N/A";
+                  
+                  // Safe fallback to match backend date logic
+                  const attendanceDate = record.date || record.attendanceDate || record.createdAt;
+                  
+                  // Get initials for avatar (e.g., "MI" for "Mitu")
+                  const initials = employeeName.substring(0, 2).toUpperCase();
 
                   return (
-                    <tr key={record._id} className="hover">
+                    <tr key={record._id} className="hover bg-base-100 shadow-sm rounded-xl">
                       
-                      {/* Student Profile Column */}
-                      <td className="py-4">
-                        <div className="flex items-center space-x-3">
-                          <div className="avatar">
-                            <div className="mask mask-squircle w-10 h-10 bg-base-200">
-                              <img 
-                                src={studentPhoto} 
-                                alt={studentName} 
-                                onError={(e) => { e.target.src = 'https://via.placeholder.com/40'; }}
-                              />
-                            </div>
+                      {/* Employee Profile Column */}
+                      <td className="py-4 bg-white rounded-l-xl border-y border-l border-base-200">
+                        <div className="flex items-center space-x-4 ml-2">
+                          <div className="avatar placeholder">
+                            {employeePhoto ? (
+                              <div className="mask mask-squircle w-12 h-12">
+                                <img src={employeePhoto} alt={employeeName} onError={(e) => { e.target.src = 'https://via.placeholder.com/48'; }}/>
+                              </div>
+                            ) : (
+                              <div className={`mask mask-squircle w-12 h-12 flex items-center justify-center font-bold text-lg ${getAvatarColor(employeeName)}`}>
+                                <span>{initials}</span>
+                              </div>
+                            )}
                           </div>
                           <div>
-                            <div className="font-semibold text-base">{studentName}</div>
-                            <div className="text-xs text-base-content/60">Reg No: {regNo}</div>
+                            <div className="font-semibold text-base text-base-content">{employeeName}</div>
+                            <div className="text-xs text-base-content/60 mt-0.5">Reg No: {regNo}</div>
                           </div>
                         </div>
                       </td>
 
-                      {/* Date Column */}
-                      <td className="py-4 hidden sm:table-cell">
-                        <div className="text-sm font-medium">
-                          {formatDate(record.date)}
+                      {/* Date Column - Now explicitly visible everywhere */}
+                      <td className="py-4 bg-white border-y border-base-200">
+                        <div className="text-sm font-medium text-base-content/80">
+                          {formatDate(attendanceDate)}
                         </div>
                       </td>
 
-                      {/* Class & Section Column */}
-                      <td className="py-4 hidden md:table-cell">
-                        <div className="text-sm font-medium">{studentClass}</div>
-                        <div className="text-xs text-base-content/60">Sec: {section}</div>
+                      {/* Role & Mobile No Column */}
+                      <td className="py-4 hidden md:table-cell bg-white border-y border-base-200">
+                        <div className="text-sm font-medium text-base-content/80">{employeeRole}</div>
+                        <div className="text-xs text-base-content/60 mt-0.5">Mob: {mobileNo}</div>
                       </td>
 
                       {/* Status Column */}
-                      <td className="py-4 pr-8 text-right">
-                        {/* We now pass the entire record object here */}
+                      <td className="py-4 pr-6 text-right bg-white rounded-r-xl border-y border-r border-base-200">
                         {renderStatusBadge(record)}
                       </td>
 

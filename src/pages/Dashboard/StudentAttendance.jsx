@@ -65,7 +65,7 @@ export default function StudentAttendancePage() {
     studentClass: '',
     section: '',
     date: '',
-    status: true, // Boolean default
+    status: true, // Internal form boolean default
   });
 
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
@@ -96,10 +96,13 @@ export default function StudentAttendancePage() {
 
   // --- DYNAMIC SEARCH API IMPLEMENTATION ---
   useEffect(() => {
-    // Both students and attendances are now fetched using the debounced search term
     fetchStudentsByBranch(undefined, currentPage, limit, debouncedSearch);
-    fetchStudentAttendancesByBranch(undefined, currentPage, limit, debouncedSearch);
-  }, [fetchStudentsByBranch, fetchStudentAttendancesByBranch, currentPage, limit, debouncedSearch]);
+    fetchStudentAttendancesByBranch(undefined, currentPage, limit, {
+      date: appliedFilterDate,
+      studentClass: appliedFilterClass,
+      section: appliedFilterSection
+    });
+  }, [fetchStudentsByBranch, fetchStudentAttendancesByBranch, currentPage, limit, debouncedSearch, appliedFilterDate, appliedFilterClass, appliedFilterSection]);
 
   const uniqueClasses = Array.from(new Set(sections?.map((s) => s.className).filter(Boolean)));
   
@@ -162,37 +165,35 @@ export default function StudentAttendancePage() {
     }));
   };
 
-  // --- Inline Single Row API Integration (Boolean true/false) ---
+  // --- Inline Single Row API Integration (Sends RegistrationNo) ---
   const handleInlineSubmit = async (row) => {
-    const currentStatus = localStatuses[row._id] !== undefined ? localStatuses[row._id] : (row.status !== undefined ? row.status : 'Not Marked');
+    const currentStatus = localStatuses[row._id] !== undefined ? localStatuses[row._id] : (row.attendanceStatus !== undefined ? row.attendanceStatus : 'Not Marked');
     
-    // Evaluate to purely boolean: if 'Not Marked' or loosely 'present', it's true. If explicitly 'absent' or false, it's false.
-    const finalStatus = currentStatus === 'Not Marked' ? true : (currentStatus === true || String(currentStatus).toLowerCase() === 'present');
+    // Evaluate to boolean
+    const isPresent = currentStatus === 'Not Marked' ? true : (currentStatus === true || String(currentStatus).toLowerCase() === 'present');
 
     const payload = {
       studentId: row._id,
-      registrationNo: row.registrationNo || '',
+      registrationNo: row.registrationNo || '', // Sent to Database based on new model
       studentName: row.studentName || '',
       studentClass: row.studentClass || '',
       section: row.section || '',
       date: appliedFilterDate || new Date().toISOString().split('T')[0],
-      status: finalStatus, // Stores strictly boolean `true` or `false`
+      attendanceStatus: isPresent ? "Present" : "Absent", 
     };
 
     setIsSubmitting(true);
     try {
       if (row.attendanceId) {
         await updateStudentAttendance(row.attendanceId, payload);
-        // Show Warning Toast if Absent, Success if Present
-        if (!finalStatus) {
+        if (!isPresent) {
            toast.warning(`Warning: ${row.studentName} updated as Absent.`);
         } else {
            toast.success(`Attendance updated for ${row.studentName}`);
         }
       } else {
         await createStudentAttendance(payload);
-        // Show Warning Toast if Absent, Success if Present
-        if (!finalStatus) {
+        if (!isPresent) {
            toast.warning(`Warning: ${row.studentName} marked as Absent.`);
         } else {
            toast.success(`Attendance marked for ${row.studentName}`);
@@ -204,7 +205,11 @@ export default function StudentAttendancePage() {
         delete newState[row._id];
         return newState;
       });
-      fetchStudentAttendancesByBranch(undefined, currentPage, limit, debouncedSearch);
+      fetchStudentAttendancesByBranch(undefined, currentPage, limit, {
+        date: appliedFilterDate,
+        studentClass: appliedFilterClass,
+        section: appliedFilterSection
+      });
     } catch (err) {
       toast.error(err.message || "Failed to save attendance.");
     } finally {
@@ -212,31 +217,44 @@ export default function StudentAttendancePage() {
     }
   };
 
-  // --- Form Submit (Modal) ---
+  // --- Form Submit (Modal) (Sends RegistrationNo) ---
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      const pureBooleanStatus = formData.status === 'true' || formData.status === true || formData.status === 'Present';
-      const submitData = { ...formData, status: pureBooleanStatus };
+      const isPresent = formData.status === 'true' || formData.status === true || formData.status === 'Present';
+      
+      const submitData = { 
+        studentName: formData.studentName,
+        studentId: formData.studentId || editId,
+        registrationNo: formData.registrationNo, // Sent to Database based on new model
+        studentClass: formData.studentClass,
+        section: formData.section,
+        date: formData.date,
+        attendanceStatus: isPresent ? "Present" : "Absent" 
+      };
 
       if (editId) {
         await updateStudentAttendance(editId, submitData);
-        if (!pureBooleanStatus) {
+        if (!isPresent) {
            toast.warning(`Warning: ${submitData.studentName} updated as Absent.`);
         } else {
            toast.success("Attendance updated successfully!");
         }
       } else {
         await createStudentAttendance(submitData);
-        if (!pureBooleanStatus) {
+        if (!isPresent) {
            toast.warning(`Warning: ${submitData.studentName} marked as Absent.`);
         } else {
            toast.success("Attendance marked successfully!");
         }
       }
       resetForm();
-      fetchStudentAttendancesByBranch(undefined, currentPage, limit, debouncedSearch); 
+      fetchStudentAttendancesByBranch(undefined, currentPage, limit, {
+        date: appliedFilterDate,
+        studentClass: appliedFilterClass,
+        section: appliedFilterSection
+      }); 
     } catch (err) {
       toast.error(err.message || "Failed to save attendance.");
     } finally {
@@ -245,8 +263,6 @@ export default function StudentAttendancePage() {
   };
 
   const filteredData = students?.filter((student) => {
-    // Note: The debouncedSearch is now handled mostly by the API, but keeping local filtering
-    // ensures the UI stays snappy if the API returns slightly more data than needed.
     if (searchTerm) {
       const lowerSearch = searchTerm.toLowerCase();
       const matchSearch = 
@@ -279,7 +295,7 @@ export default function StudentAttendancePage() {
       ...student,
       attendanceId: attRecord?._id || null, 
       date: attRecord?.date || appliedFilterDate || '',
-      status: attRecord?.status !== undefined ? attRecord.status : 'Not Marked' 
+      attendanceStatus: attRecord?.attendanceStatus !== undefined ? attRecord.attendanceStatus : 'Not Marked' 
     };
   });
 
@@ -287,7 +303,6 @@ export default function StudentAttendancePage() {
 
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto font-sans relative">
-      {/* Added limit={3} to fix the react-toastify removalReason bug */}
       <ToastContainer position="top-right" autoClose={3000} limit={3} />
       
       <Mtitle 
@@ -321,7 +336,11 @@ export default function StudentAttendancePage() {
           <button 
             onClick={() => {
               fetchStudentsByBranch(undefined, currentPage, limit, debouncedSearch);
-              fetchStudentAttendancesByBranch(undefined, currentPage, limit, debouncedSearch);
+              fetchStudentAttendancesByBranch(undefined, currentPage, limit, {
+                date: appliedFilterDate,
+                studentClass: appliedFilterClass,
+                section: appliedFilterSection
+              });
             }}
             className="btn btn-sm btn-outline border-white text-white hover:bg-white hover:text-error"
           >
@@ -449,9 +468,8 @@ export default function StudentAttendancePage() {
                 </tr>
               ) : (
                 filteredData?.map((row) => {
-                  const currentStatus = localStatuses[row._id] !== undefined ? localStatuses[row._id] : (row.status !== undefined ? row.status : 'Not Marked');
+                  const currentStatus = localStatuses[row._id] !== undefined ? localStatuses[row._id] : (row.attendanceStatus !== undefined ? row.attendanceStatus : 'Not Marked');
                   
-                  // Allows parsing of actual booleans OR old string records securely
                   const isPresent = currentStatus === true || String(currentStatus).toLowerCase() === 'present';
                   const isAbsent = currentStatus === false || String(currentStatus).toLowerCase() === 'absent';
 
@@ -490,23 +508,23 @@ export default function StudentAttendancePage() {
                         <div className="text-xs text-base-content/50">Sec: {row.section || 'N/A'}</div>
                       </td>
 
-                      {/* Present Checkbox Column (true) */}
+                      {/* Present Checkbox Column */}
                       <td className="py-4 text-center border-b-0">
                         <input 
                           type="checkbox" 
                           className={`checkbox rounded-lg ${isPresent ? 'checkbox-success border-success' : 'border-[#6dc22e]'}`} 
                           checked={isPresent}
-                          onChange={() => handleStatusChange(row._id, isPresent ? 'Not Marked' : true)}
+                          onChange={() => handleStatusChange(row._id, isPresent ? 'Not Marked' : 'Present')}
                         />
                       </td>
 
-                      {/* Absent Checkbox Column (false) */}
+                      {/* Absent Checkbox Column */}
                       <td className="py-4 text-center border-b-0">
                         <input 
                           type="checkbox" 
                           className={`checkbox rounded-lg ${isAbsent ? 'checkbox-error border-error bg-error' : 'border-base-300'}`} 
                           checked={isAbsent}
-                          onChange={() => handleStatusChange(row._id, isAbsent ? 'Not Marked' : false)}
+                          onChange={() => handleStatusChange(row._id, isAbsent ? 'Not Marked' : 'Absent')}
                         />
                       </td>
 
@@ -556,19 +574,37 @@ export default function StudentAttendancePage() {
           </h3>
 
           <form onSubmit={handleSubmit} className="py-2 space-y-3">
-            <div className="form-control w-full">
-              <label className="label">
-                <span className="label-text font-semibold text-base-content">Student Name</span>
-              </label>
-              <input 
-                type="text" 
-                name="studentName"
-                value={formData.studentName}
-                onChange={handleInputChange}
-                required
-                readOnly
-                className="input input-bordered w-full focus:input-primary bg-base-200 cursor-not-allowed"
-              />
+            <div className="flex gap-4">
+              <div className="form-control w-full">
+                <label className="label">
+                  <span className="label-text font-semibold text-base-content">Student Name</span>
+                </label>
+                <input 
+                  type="text" 
+                  name="studentName"
+                  value={formData.studentName}
+                  onChange={handleInputChange}
+                  required
+                  readOnly
+                  className="input input-bordered w-full focus:input-primary bg-base-200 cursor-not-allowed"
+                />
+              </div>
+
+              {/* Added Registration No field to Modal for completeness */}
+              <div className="form-control w-full">
+                <label className="label">
+                  <span className="label-text font-semibold text-base-content">Registration No</span>
+                </label>
+                <input 
+                  type="text" 
+                  name="registrationNo"
+                  value={formData.registrationNo}
+                  onChange={handleInputChange}
+                  required
+                  readOnly={!!editId} // Typically read-only if modifying existing data
+                  className={`input input-bordered w-full focus:input-primary ${editId ? 'bg-base-200 cursor-not-allowed' : ''}`}
+                />
+              </div>
             </div>
 
             <div className="flex gap-4">
@@ -705,12 +741,12 @@ export default function StudentAttendancePage() {
                 <div className="flex items-center">
                   <span className="font-semibold text-base-content/70 w-28">Status:</span>
                   <div className={`badge ${
-                        (viewData.status === true || viewData.status?.toString().toLowerCase() === 'present') ? 'badge-success text-white' : 
-                        (viewData.status === false || viewData.status?.toString().toLowerCase() === 'absent') ? 'badge-error text-white' : 
+                        (viewData.attendanceStatus?.toString().toLowerCase() === 'present') ? 'badge-success text-white' : 
+                        (viewData.attendanceStatus?.toString().toLowerCase() === 'absent') ? 'badge-error text-white' : 
                         'badge-ghost'
                       } font-medium`}>
-                    {(viewData.status === true || viewData.status?.toString().toLowerCase() === 'present') ? 'Present' : 
-                     (viewData.status === false || viewData.status?.toString().toLowerCase() === 'absent') ? 'Absent' : 
+                    {(viewData.attendanceStatus?.toString().toLowerCase() === 'present') ? 'Present' : 
+                     (viewData.attendanceStatus?.toString().toLowerCase() === 'absent') ? 'Absent' : 
                      'Not Marked'}
                   </div>
                 </div>

@@ -69,11 +69,7 @@ const useMenuItems = () => {
       icon: <MdOutlineFactCheck className="text-xl" /> 
     },
    
-{ 
-      title: "Students Attendance Record", 
-      path: "/attendance/studentRecord", // Correct router path
-      icon: <MdOutlineFactCheck className="text-xl" /> 
-    },
+
 
     { 
       title: "Employee Attendance", 
@@ -84,12 +80,30 @@ const useMenuItems = () => {
 },
 
 
-  // { title: "Attendance", path: "/attendance", icon: <MdOutlineFactCheck className="text-xl" /> },
-  //   { title: "Teacher Attendance", path: "/teacher-attendance", icon: <MdOutlineFactCheck className="text-xl" /> },
-  //   { title: "Employee Attendance", path: "/employee-attendance", icon: <MdOutlineFactCheck className="text-xl" /> },
+    { 
+  title: "Attendance Report",  
+  icon: <MdOutlineFactCheck className="text-xl" />,
+
+  list: [
+    { 
+      title: "Students Attendance Record", 
+      path: "/attendanceReport/studentRecord", // Correct router path
+      icon: <MdOutlineFactCheck className="text-xl" /> 
+    },
+   
+{ 
+      title: "Employee Attendance Record", 
+      path: "/attendanceReport/employeeRecord", // Correct router path
+      icon: <MdOutlineFactCheck className="text-xl" /> 
+    },
+
+    
+  ]
+},
 
 
-    { title: "Attendance Report", path: "/attendance-report", icon: <MdOutlineAssessment className="text-xl" /> },
+  
+
     { title: "Exams", path: "/exams", icon: <MdOutlineEditNote className="text-xl" /> },
     { title: "Results", path: "/results", icon: <MdOutlineEmojiEvents className="text-xl" /> },
     { title: "Routine", path: "/routine", icon: <MdOutlineSchedule className="text-xl" /> },

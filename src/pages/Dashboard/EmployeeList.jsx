@@ -54,7 +54,7 @@ export default function EmployeeList() {
   const tableHeaders = [
     { id: "employee", label: "Employee Profile", className: "py-4 rounded-tl-box" },
     { id: "email", label: "Email Address", className: "py-4 hidden sm:table-cell" },
-    { id: "roleInfo", label: "Role & Branch", className: "py-4 hidden md:table-cell" },
+    { id: "roleInfo", label: "Role", className: "py-4 hidden md:table-cell" },
     { id: "contact", label: "Contact Info", className: "py-4 hidden lg:table-cell" },
     { id: "actions", label: "Actions", className: "py-4 text-right rounded-tr-box pr-8" }
   ];
@@ -341,10 +341,7 @@ export default function EmployeeList() {
                             />
                           </div>
                         </div>
-                        <div>
-                          <div className="font-semibold text-base">{employeeName}</div>
-                          <div className="text-xs text-base-content/60 capitalize">{employee.role || employee.employeeRole ||'Staff'}</div>
-                        </div>
+                       
                       </div>
                     </td>
 
@@ -560,10 +557,10 @@ export default function EmployeeList() {
                   <span className="font-semibold text-base-content/70 w-28">Phone:</span>
                   <span className="text-base-content">{viewData.mobileNo || viewData.phone || 'N/A'}</span>
                 </div>
-                <div className="flex items-center">
+                {/* <div className="flex items-center">
                   <span className="font-semibold text-base-content/70 w-28">Branch:</span>
                   <span className="text-base-content">{viewData.branch || 'N/A'}</span>
-                </div>
+                </div> */}
                 <div className="flex items-center">
                   <span className="font-semibold text-base-content/70 w-28">Status:</span>
                   <span className={`badge ${viewData.isActive !== false ? 'badge-success' : 'badge-error'} badge-sm`}>

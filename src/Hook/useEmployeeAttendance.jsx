@@ -1,11 +1,11 @@
 import { useState, useCallback } from "react";
 import useAuth from "./useAuth"; // Ensure you import your useAuth hook
 
-const API = `${process.env.REACT_APP_BACKEND_URL}/student-attendance`;
+const API = `${process.env.REACT_APP_BACKEND_URL}/employee-attendance`;
 
-export const useStudentAttendance = () => {
-  const [studentAttendances, setStudentAttendances] = useState([]);
-  const [studentAttendanceDetails, setStudentAttendanceDetails] = useState(null);
+export const useEmployeeAttendance = () => {
+  const [employeeAttendances, setEmployeeAttendances] = useState([]);
+  const [employeeAttendanceDetails, setEmployeeAttendanceDetails] = useState(null);
   const [pagination, setPagination] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -17,27 +17,28 @@ export const useStudentAttendance = () => {
   const buildQueryParams = (page, limit, filters = {}) => {
     const params = new URLSearchParams({ page, limit });
     if (filters.date) params.append("date", filters.date);
-    if (filters.studentClass) params.append("studentClass", filters.studentClass);
-    if (filters.section) params.append("section", filters.section);
+    if (filters.employeeRole) params.append("employeeRole", filters.employeeRole);
+    if (filters.employeeMobileNo) params.append("employeeMobileNo", filters.employeeMobileNo);
+    if (filters.search) params.append("search", filters.search);
     return params.toString();
   };
 
-  // GET: All Student Attendances (Paginated & Searchable via Filters)
-  const fetchAllStudentAttendances = useCallback(async (page = 1, limit = 10, filters = {}) => {
+  // GET: All Employee Attendances (Paginated & Searchable via Filters)
+  const fetchAllEmployeeAttendances = useCallback(async (page = 1, limit = 10, filters = {}) => {
     setLoading(true);
     setError(null);
     try {
       const queryString = buildQueryParams(page, limit, filters);
       const response = await fetch(`${API}/?${queryString}`, {
         headers: {
-          "Authorization": `Bearer ${token}` // Required by your backend middleware
+          "Authorization": `Bearer ${token}` 
         }
       });
       const result = await response.json();
       
-      if (!response.ok) throw new Error(result.error || "Failed to fetch student attendances");
+      if (!response.ok) throw new Error(result.error || "Failed to fetch employee attendances");
       
-      setStudentAttendances(result.data);
+      setEmployeeAttendances(result.data);
       setPagination(result.pagination);
       return result;
     } catch (err) {
@@ -48,22 +49,22 @@ export const useStudentAttendance = () => {
   }, [token]);
 
   
-  // GET: All Student Attendances by Branch (Paginated & Searchable via Filters)
-  const fetchStudentAttendancesByBranch = useCallback(async (targetBranch = branch, page = 1, limit = 10, filters = {}) => {
+  // GET: All Employee Attendances by Branch (Paginated & Searchable via Filters)
+  const fetchEmployeeAttendancesByBranch = useCallback(async (targetBranch = branch, page = 1, limit = 10, filters = {}) => {
     setLoading(true);
     setError(null);
     try {
       const queryString = buildQueryParams(page, limit, filters);
       const response = await fetch(`${API}/${targetBranch}/get-all?${queryString}`, {
         headers: {
-          "Authorization": `Bearer ${token}` // Required by your backend middleware
+          "Authorization": `Bearer ${token}` 
         }
       });
       const result = await response.json();
       
-      if (!response.ok) throw new Error(result.error || "Failed to fetch branch student attendances");
+      if (!response.ok) throw new Error(result.error || "Failed to fetch branch employee attendances");
       
-      setStudentAttendances(result.data);
+      setEmployeeAttendances(result.data);
       setPagination(result.pagination);
       return result;
     } catch (err) {
@@ -73,8 +74,8 @@ export const useStudentAttendance = () => {
     }
   }, [branch, token]);
 
-  // GET: Single Student Attendance Details By ID
-  const fetchStudentAttendanceById = useCallback(async (id) => {
+  // GET: Single Employee Attendance Details By ID
+  const fetchEmployeeAttendanceById = useCallback(async (id) => {
     setLoading(true);
     setError(null);
     try {
@@ -85,9 +86,9 @@ export const useStudentAttendance = () => {
       });
       const result = await response.json();
       
-      if (!response.ok) throw new Error(result.message || result.error || "Student attendance not found");
+      if (!response.ok) throw new Error(result.message || result.error || "Employee attendance not found");
       
-      setStudentAttendanceDetails(result);
+      setEmployeeAttendanceDetails(result);
       return result;
     } catch (err) {
       setError(err.message);
@@ -96,12 +97,14 @@ export const useStudentAttendance = () => {
     }
   }, [token]);
 
-  // POST: Create a new Student Attendance
-  const createStudentAttendance = useCallback(async (studentAttendanceData) => {
+  // POST: Create OR Update (Upsert) a new Employee Attendance
+  const createEmployeeAttendance = useCallback(async (employeeAttendanceData) => {
     setLoading(true);
     setError(null);
     try {
-      const payload = { ...studentAttendanceData, branch: studentAttendanceData.branch || branch };
+      // Ensure the payload has the required fields for the backend Upsert to work:
+      // specifically 'employeeId' and 'date'.
+      const payload = { ...employeeAttendanceData, branch: employeeAttendanceData.branch || branch };
       
       const response = await fetch(`${API}/post`, {
         method: "POST",
@@ -113,7 +116,7 @@ export const useStudentAttendance = () => {
       });
       
       const result = await response.json();
-      if (!response.ok) throw new Error(result.error || "Failed to create student attendance");
+      if (!response.ok) throw new Error(result.error || "Failed to create/update employee attendance");
       
       return result;
     } catch (err) {
@@ -124,8 +127,8 @@ export const useStudentAttendance = () => {
     }
   }, [branch, token]);
 
-  // PUT: Update a Student Attendance
-  const updateStudentAttendance = useCallback(async (id, studentAttendanceData) => {
+  // PUT: Update an Employee Attendance (Targeted update by MongoDB _id)
+  const updateEmployeeAttendance = useCallback(async (id, employeeAttendanceData) => {
     setLoading(true);
     setError(null);
     try {
@@ -135,11 +138,11 @@ export const useStudentAttendance = () => {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${token}`
         },
-        body: JSON.stringify(studentAttendanceData),
+        body: JSON.stringify(employeeAttendanceData),
       });
       
       const result = await response.json();
-      if (!response.ok) throw new Error(result.message || result.error || "Failed to update student attendance");
+      if (!response.ok) throw new Error(result.message || result.error || "Failed to update employee attendance");
       
       return result;
     } catch (err) {
@@ -150,8 +153,8 @@ export const useStudentAttendance = () => {
     }
   }, [token]);
 
-  // DELETE: Remove a Student Attendance
-  const removeStudentAttendance = useCallback(async (id) => {
+  // DELETE: Remove an Employee Attendance
+  const removeEmployeeAttendance = useCallback(async (id) => {
     setLoading(true);
     setError(null);
     try {
@@ -161,7 +164,7 @@ export const useStudentAttendance = () => {
       });
       
       const result = await response.json();
-      if (!response.ok) throw new Error(result.message || result.error || "Failed to delete student attendance");
+      if (!response.ok) throw new Error(result.message || result.error || "Failed to delete employee attendance");
       
       return result;
     } catch (err) {
@@ -173,18 +176,18 @@ export const useStudentAttendance = () => {
   }, [token]);
 
   return {
-    studentAttendances,
-    studentAttendanceDetails,
+    employeeAttendances,
+    employeeAttendanceDetails,
     pagination,
     loading,
     error,
-    fetchAllStudentAttendances,
-    fetchStudentAttendancesByBranch,
-    fetchStudentAttendanceById,
-    createStudentAttendance,
-    updateStudentAttendance,
-    removeStudentAttendance,
+    fetchAllEmployeeAttendances,
+    fetchEmployeeAttendancesByBranch,
+    fetchEmployeeAttendanceById,
+    createEmployeeAttendance,
+    updateEmployeeAttendance,
+    removeEmployeeAttendance,
   };
 };
 
-export default useStudentAttendance;
+export default useEmployeeAttendance;

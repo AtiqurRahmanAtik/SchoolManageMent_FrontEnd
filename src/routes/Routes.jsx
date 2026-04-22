@@ -33,7 +33,7 @@ import Attendance from "../pages/Dashboard/Attendance";
 import Calendar from "../pages/Dashboard/Calendar";
 
 import Subjects from "../pages/Dashboard/Subjects";
-import TeacherAttendance from "../pages/Dashboard/StudentAttendance";
+
 
 import Exams from "../pages/Dashboard/Exams";
 import Results from "../pages/Dashboard/Results";
@@ -55,6 +55,8 @@ import EmployeeList from "../pages/Dashboard/EmployeeList";
 import StudentAttendance from "../pages/Dashboard/StudentAttendance";
 import StudentsAttendanceRecord from "../pages/Dashboard/StudentsAttendanceRecord";
 import EmployeeAttendance from "../pages/Dashboard/EmployeeAttendance";
+import StudentAttendancePage from "../pages/Dashboard/StudentAttendance";
+import EmployeeAttendanceRecord from "../pages/Dashboard/EmployeeAttendanceRecord";
 
 
 
@@ -203,10 +205,32 @@ export const router = createBrowserRouter([
       path: "student", 
       element: (
         <PrivateRoot>
-          <TeacherAttendance />
+          <StudentAttendancePage />
         </PrivateRoot>
       ),
     },
+    {
+     
+      path: "employee", 
+      element: (
+        <PrivateRoot>
+          <EmployeeAttendance />
+        </PrivateRoot>
+      ),
+    },
+    
+    
+  ],
+},
+      
+
+
+
+{
+  path: "attendanceReport",
+  children: [
+
+
      {
      
       path: "studentRecord", 
@@ -216,23 +240,21 @@ export const router = createBrowserRouter([
         </PrivateRoot>
       ),
     },
-    {
-      // URL will be: /attendance/employee
-      path: "employee", 
+    
+     {
+     
+      path: "employeeRecord", 
       element: (
         <PrivateRoot>
-          <EmployeeAttendance />
+          <EmployeeAttendanceRecord />
         </PrivateRoot>
       ),
     },
+    
   ],
 },
       
-      
-      {
-        path: "attendance-report",
-        element: <PrivateRoot><AttendanceReport /></PrivateRoot>,
-      },
+     
       {
         path: "exams",
         element: <PrivateRoot><Exams /></PrivateRoot>,
