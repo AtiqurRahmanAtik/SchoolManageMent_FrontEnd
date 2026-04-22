@@ -248,7 +248,7 @@ export default function Students() {
       
       {/* Header Section */}
       <Mtitle 
-        title="Students Directory" 
+        title="Students List" 
         middlecontent={
           <span className="text-sm text-base-content/70 hidden md:inline-block">
             Manage and view all enrolled students.

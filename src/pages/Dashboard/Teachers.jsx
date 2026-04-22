@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import useTeachers from '../../Hook/useTeachers'; // Adjust path as needed
+import useSubject from '../../Hook/useSubject'; // Added useSubject hook
 import Pagination from '../../components/Pagination'; // Adjust path as needed
 import TableControls from '../../components/TableControls'; // Adjust path as needed
 import SkeletonLoader from '../../components/SkeletonLoader'; // Adjust path as needed
@@ -19,11 +20,14 @@ export default function Teachers() {
     updateTeacher
   } = useTeachers();
 
+  // Bring in subjects to populate dropdowns dynamically from API
+  const { subjects, fetchSubjectsByBranch, loading: subjectLoading } = useSubject();
+
   // Local state for the "Show entries" dropdown and Search
   const [limit, setLimit] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
   
-  // --- NEW: Filter State ---
+  // --- Filter State ---
   const [filterSubject, setFilterSubject] = useState("");
 
   // Form & Add/Edit Modal States
@@ -43,7 +47,6 @@ export default function Teachers() {
   const [viewData, setViewData] = useState(null);
 
   // --- Dynamic Table Headers ---
-  // ID column has been removed here
   const tableHeaders = [
     { id: "teacher", label: "Teacher Profile", className: "py-4 rounded-tl-box" },
     { id: "subject", label: "Subject", className: "py-4 hidden sm:table-cell" },
@@ -51,13 +54,14 @@ export default function Teachers() {
     { id: "actions", label: "Actions", className: "py-4 text-right rounded-tr-box pr-8" }
   ];
 
-  // Fetch teachers on component mount or when limit changes
+  // Fetch teachers and subjects on component mount
   useEffect(() => {
     fetchTeachers(1, limit);
-  }, [fetchTeachers, limit]);
+    fetchSubjectsByBranch(undefined, "", 1, 100); // Fetch subjects for dropdowns
+  }, [fetchTeachers, fetchSubjectsByBranch, limit]);
 
-  // --- Extract Unique Subjects ---
-  const uniqueSubjects = Array.from(new Set(teachers?.map((t) => t.subject).filter(Boolean)));
+  // --- Extract Unique Subjects from Backend Data ---
+  const uniqueSubjects = Array.from(new Set(subjects?.map((s) => s.SubjectName).filter(Boolean)));
 
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this teacher?")) {
@@ -191,7 +195,7 @@ export default function Teachers() {
           <button 
             onClick={() => {
               resetForm();
-              setIsModalOpen(true);
+              setIsModalOpen(true); // Opens the Add Teacher Modal
             }}
             className="btn btn-primary shadow-sm"
           >
@@ -222,7 +226,7 @@ export default function Teachers() {
           onSearchChange={handleSearchChange}
         />
 
-        {/* --- NEW: Subject Filter Dropdown --- */}
+        {/* --- Subject Filter Dropdown (API Integrated) --- */}
         <div className="flex flex-wrap items-end gap-4 border-t border-base-200 pt-4">
           <div className="form-control w-full sm:max-w-xs">
             <label className="label">
@@ -232,8 +236,9 @@ export default function Teachers() {
               className="select select-bordered w-full focus:select-primary"
               value={filterSubject}
               onChange={(e) => setFilterSubject(e.target.value)}
+              disabled={subjectLoading}
             >
-              <option value="">All Subjects</option>
+              <option value="">{subjectLoading ? "Loading..." : "All Subjects"}</option>
               {uniqueSubjects.map((subject, idx) => (
                 <option key={idx} value={subject}>{subject}</option>
               ))}
@@ -406,19 +411,24 @@ export default function Teachers() {
               />
             </div>
             
+            {/* --- Updated Subject Dropdown in the Modal (API Integrated) --- */}
             <div className="form-control w-full">
               <label className="label">
                 <span className="label-text font-semibold text-base-content">Subject</span>
               </label>
-              <input 
-                type="text" 
+              <select
                 name="subject"
                 value={formData.subject}
                 onChange={handleInputChange}
                 required
-                className="input input-bordered w-full focus:input-primary"
-                placeholder="e.g. Mathematics"
-              />
+                disabled={subjectLoading}
+                className="select select-bordered w-full focus:select-primary"
+              >
+                <option value="" disabled>{subjectLoading ? "Loading Subjects..." : "Select a Subject"}</option>
+                {uniqueSubjects.map((sub, idx) => (
+                  <option key={idx} value={sub}>{sub}</option>
+                ))}
+              </select>
             </div>
 
             <div className="form-control w-full">
