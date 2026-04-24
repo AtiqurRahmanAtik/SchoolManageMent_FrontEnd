@@ -372,9 +372,7 @@ export default function Routine() {
 
 
 
-         <div className="modal-backdrop" onClick={closeModal}>
-          <button type="button" className="cursor-default">close</button>
-        </div>
+        
       </div>
     </div>
   );
