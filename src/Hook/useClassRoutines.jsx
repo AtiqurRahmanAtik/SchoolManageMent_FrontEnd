@@ -1,32 +1,28 @@
 import { useState, useCallback } from "react";
 import useAuth from "./useAuth"; 
 
-const API = `${process.env.REACT_APP_BACKEND_URL}/subjects`;
+const API = `${process.env.REACT_APP_BACKEND_URL}/class-routine`;
 
-export const useSubject = () => {
-  const [subjects, setSubjects] = useState([]);
-  const [subjectDetails, setSubjectDetails] = useState(null);
+export const useClassRoutines = () => {
+  const [classRoutines, setClassRoutines] = useState([]);
+  const [classRoutineDetails, setClassRoutineDetails] = useState(null);
   const [pagination, setPagination] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   const { branch } = useAuth(); 
 
-  // GET: All Subjects (Paginated & Searchable)
-  const fetchAllSubjects = useCallback(async (search = "", page = 1, limit = 10) => {
+  // GET: All Class Routines (Paginated & Searchable)
+  const fetchAllClassRoutines = useCallback(async (page = 1, limit = 10, search = "") => {
     setLoading(true);
     setError(null);
     try {
-      // Build dynamic query parameters
-      const queryParams = new URLSearchParams({ page, limit });
-      if (search) queryParams.append("search", search);
-
-      const response = await fetch(`${API}/?${queryParams.toString()}`);
+      const response = await fetch(`${API}/?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`);
       const result = await response.json();
       
-      if (!response.ok) throw new Error(result.error || "Failed to fetch subjects");
+      if (!response.ok) throw new Error(result.error || "Failed to fetch class routines");
       
-      setSubjects(result.data);
+      setClassRoutines(result.data);
       setPagination(result.pagination);
       return result;
     } catch (err) {
@@ -37,21 +33,17 @@ export const useSubject = () => {
   }, []);
 
   
-  // GET: All Subjects by Branch (Paginated & Searchable)
-  const fetchSubjectsByBranch = useCallback(async (targetBranch = branch, search = "", page = 1, limit = 10) => {
+  // GET: All Class Routines by Branch (Paginated & Searchable)
+  const fetchClassRoutinesByBranch = useCallback(async (targetBranch = branch, page = 1, limit = 10, search = "") => {
     setLoading(true);
     setError(null);
     try {
-      // Build dynamic query parameters
-      const queryParams = new URLSearchParams({ page, limit });
-      if (search) queryParams.append("search", search);
-
-      const response = await fetch(`${API}/${targetBranch}/get-all?${queryParams.toString()}`);
+      const response = await fetch(`${API}/${targetBranch}/get-all?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`);
       const result = await response.json();
       
-      if (!response.ok) throw new Error(result.error || "Failed to fetch branch subjects");
+      if (!response.ok) throw new Error(result.error || "Failed to fetch branch class routines");
       
-      setSubjects(result.data);
+      setClassRoutines(result.data);
       setPagination(result.pagination);
       return result;
     } catch (err) {
@@ -61,17 +53,17 @@ export const useSubject = () => {
     }
   }, [branch]);
 
-  // GET: Single Subject Details By ID
-  const fetchSubjectById = useCallback(async (id) => {
+  // GET: Single Class Routine Details By ID
+  const fetchClassRoutineById = useCallback(async (id) => {
     setLoading(true);
     setError(null);
     try {
       const response = await fetch(`${API}/get-id/${id}`);
       const result = await response.json();
       
-      if (!response.ok) throw new Error(result.message || result.error || "Subject not found");
+      if (!response.ok) throw new Error(result.message || result.error || "Class routine not found");
       
-      setSubjectDetails(result);
+      setClassRoutineDetails(result);
       return result;
     } catch (err) {
       setError(err.message);
@@ -80,37 +72,37 @@ export const useSubject = () => {
     }
   }, []);
 
-  // POST: Create a new Subject
-  const createSubject = useCallback(async (subjectData) => {
+  // POST: Create a new Class Routine
+  const createClassRoutine = useCallback(async (classRoutineData) => {
     setLoading(true);
     setError(null);
     try {
       // Fallback to the authenticated user's branch if not provided in the form
-      const payload = { ...subjectData, branch: subjectData.branch || branch };
+      const payload = { ...classRoutineData, branch: classRoutineData.branch || branch };
       
       const response = await fetch(`${API}/post`, {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",
-          // "Authorization": `Bearer ${token}` 
+          // "Authorization": `Bearer ${token}` // Add this if you enable authenticateToken middleware
         },
         body: JSON.stringify(payload),
       });
       
       const result = await response.json();
-      if (!response.ok) throw new Error(result.error || "Failed to create subject");
+      if (!response.ok) throw new Error(result.error || "Failed to create class routine");
       
       return result;
     } catch (err) {
       setError(err.message);
-      throw err; 
+      throw err; // Re-throw so components can handle form submission errors
     } finally {
       setLoading(false);
     }
   }, [branch]);
 
-  // PUT: Update a Subject
-  const updateSubject = useCallback(async (id, subjectData) => {
+  // PUT: Update a Class Routine
+  const updateClassRoutine = useCallback(async (id, classRoutineData) => {
     setLoading(true);
     setError(null);
     try {
@@ -120,11 +112,11 @@ export const useSubject = () => {
           "Content-Type": "application/json",
           // "Authorization": `Bearer ${token}`
         },
-        body: JSON.stringify(subjectData),
+        body: JSON.stringify(classRoutineData),
       });
       
       const result = await response.json();
-      if (!response.ok) throw new Error(result.message || result.error || "Failed to update subject");
+      if (!response.ok) throw new Error(result.message || result.error || "Failed to update class routine");
       
       return result;
     } catch (err) {
@@ -135,8 +127,8 @@ export const useSubject = () => {
     }
   }, []);
 
-  // DELETE: Remove a Subject
-  const removeSubject = useCallback(async (id) => {
+  // DELETE: Remove a Class Routine
+  const removeClassRoutine = useCallback(async (id) => {
     setLoading(true);
     setError(null);
     try {
@@ -146,7 +138,7 @@ export const useSubject = () => {
       });
       
       const result = await response.json();
-      if (!response.ok) throw new Error(result.message || result.error || "Failed to delete subject");
+      if (!response.ok) throw new Error(result.message || result.error || "Failed to delete class routine");
       
       return result;
     } catch (err) {
@@ -156,21 +148,20 @@ export const useSubject = () => {
       setLoading(false);
     }
   }, []);
-  
 
   return {
-    subjects,
-    subjectDetails,
+    classRoutines,
+    classRoutineDetails,
     pagination,
     loading,
     error,
-    fetchAllSubjects,
-    fetchSubjectsByBranch,
-    fetchSubjectById,
-    createSubject,
-    updateSubject,
-    removeSubject,
-  };
+    fetchAllClassRoutines,
+    fetchClassRoutinesByBranch,
+    fetchClassRoutineById,
+    createClassRoutine,
+    updateClassRoutine,
+    removeClassRoutine,
+  };  
 };
 
-export default useSubject;
+export default useClassRoutines;

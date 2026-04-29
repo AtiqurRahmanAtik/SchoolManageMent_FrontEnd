@@ -57,6 +57,10 @@ import StudentsAttendanceRecord from "../pages/Dashboard/StudentsAttendanceRecor
 import EmployeeAttendance from "../pages/Dashboard/EmployeeAttendance";
 import StudentAttendancePage from "../pages/Dashboard/StudentAttendance";
 import EmployeeAttendanceRecord from "../pages/Dashboard/EmployeeAttendanceRecord";
+import ClassTime from "../pages/Dashboard/ClassTime";
+import Day from "../pages/Dashboard/Day";
+import Grade from "../pages/Dashboard/Grade";
+import AddMarks from "../pages/Dashboard/AddMarks";
 
 
 
@@ -260,6 +264,10 @@ export const router = createBrowserRouter([
         element: <PrivateRoot><Exams /></PrivateRoot>,
       },
       {
+        path: "addMarks",
+        element: <PrivateRoot><AddMarks /></PrivateRoot>,
+      },
+       {
         path: "results",
         element: <PrivateRoot><Results /></PrivateRoot>,
       },
@@ -283,6 +291,45 @@ export const router = createBrowserRouter([
         path: "progress",
         element: <PrivateRoot><Progress /></PrivateRoot>,
       },
+
+      {
+  path: "settings",
+  children: [
+
+
+     {
+     
+      path: "classTime", 
+      element: (
+        <PrivateRoot>
+          <ClassTime />
+        </PrivateRoot>
+      ),
+    },
+    
+     {
+     
+      path: "day", 
+      element: (
+        <PrivateRoot>
+          <Day />
+        </PrivateRoot>
+      ),
+    },
+     {
+     
+      path: "grade", 
+      element: (
+        <PrivateRoot>
+          <Grade />
+        </PrivateRoot>
+      ),
+    },
+
+    
+  ],
+},
+    
       // --- Logout Route ---
       {
         path: "logout",

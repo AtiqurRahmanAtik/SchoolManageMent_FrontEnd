@@ -1,28 +1,28 @@
 import { useState, useCallback } from "react";
 import useAuth from "./useAuth"; 
 
-const API = `${process.env.REACT_APP_BACKEND_URL}/class`;
+const API = `${process.env.REACT_APP_BACKEND_URL}/student-marks`;
 
-export const useClass = () => {
-  const [classes, setClasses] = useState([]);
-  const [classDetails, setClassDetails] = useState(null);
+export const useStudentMarks = () => {
+  const [marks, setMarks] = useState([]);
+  const [markDetails, setMarkDetails] = useState(null);
   const [pagination, setPagination] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   const { branch } = useAuth(); 
 
-  // GET: All Classes (Paginated)
-  const fetchAllClasses = useCallback(async (page = 1, limit = 10) => {
+  // GET: All Student Marks (Paginated)
+  const fetchAllMarks = useCallback(async (page = 1, limit = 10) => {
     setLoading(true);
     setError(null);
     try {
       const response = await fetch(`${API}/?page=${page}&limit=${limit}`);
       const result = await response.json();
       
-      if (!response.ok) throw new Error(result.error || "Failed to fetch classes");
+      if (!response.ok) throw new Error(result.error || "Failed to fetch marks");
       
-      setClasses(result.data);
+      setMarks(result.data);
       setPagination(result.pagination);
       return result;
     } catch (err) {
@@ -32,17 +32,19 @@ export const useClass = () => {
     }
   }, []);
 
-  // GET: All Classes by Branch (Paginated)
-  const fetchClassesByBranch = useCallback(async (targetBranch = branch, page = 1, limit = 10) => {
+  // GET: Student Marks by Branch (Paginated)
+  const fetchMarksByBranch = useCallback(async (targetBranch = branch, page = 1, limit = 10) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`${API}/${targetBranch}/get-all?page=${page}&limit=${limit}`);
+      const response = await fetch(
+        `${API}/${targetBranch}/get-all?page=${page}&limit=${limit}`
+      );
       const result = await response.json();
       
-      if (!response.ok) throw new Error(result.error || "Failed to fetch branch classes");
+      if (!response.ok) throw new Error(result.error || "Failed to fetch branch marks");
       
-      setClasses(result.data);
+      setMarks(result.data);
       setPagination(result.pagination);
       return result;
     } catch (err) {
@@ -52,17 +54,17 @@ export const useClass = () => {
     }
   }, [branch]);
 
-  // GET: Single Class Details By ID
-  const fetchClassById = useCallback(async (id) => {
+  // GET: Single Mark Detail By ID
+  const fetchMarkById = useCallback(async (id) => {
     setLoading(true);
     setError(null);
     try {
       const response = await fetch(`${API}/get-id/${id}`);
       const result = await response.json();
       
-      if (!response.ok) throw new Error(result.message || result.error || "Class not found");
+      if (!response.ok) throw new Error(result.message || result.error || "Mark record not found");
       
-      setClassDetails(result);
+      setMarkDetails(result);
       return result;
     } catch (err) {
       setError(err.message);
@@ -71,20 +73,26 @@ export const useClass = () => {
     }
   }, []);
 
-  // POST: Create a new Class
-  const createClass = useCallback(async (classData) => {
+  // POST: Create a new Student Mark
+  const createMark = useCallback(async (markData) => {
     setLoading(true);
     setError(null);
     try {
-      const payload = { ...classData, branch: classData.branch || branch };
+      const payload = { ...markData, branch: markData.branch || branch };
+      
       const response = await fetch(`${API}/post`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json"
+        },
         body: JSON.stringify(payload),
       });
       
       const result = await response.json();
-      if (!response.ok) throw new Error(result.error || "Failed to create class");
+      if (!response.ok) throw new Error(result.error || "Failed to create mark record");
+      
+      // Update local state to include the new mark
+      setMarks((prev) => [result.data || result, ...prev]);
       
       return result;
     } catch (err) {
@@ -95,20 +103,23 @@ export const useClass = () => {
     }
   }, [branch]);
 
-  // PUT: Update a Class
-  const updateClass = useCallback(async (id, classData) => {
+  // PUT: Update a Student Mark
+  const updateMark = useCallback(async (id, markData) => {
     setLoading(true);
     setError(null);
     try {
       const response = await fetch(`${API}/update/${id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(classData),
+        headers: { 
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(markData),
       });
       
       const result = await response.json();
-      if (!response.ok) throw new Error(result.message || result.error || "Failed to update class");
+      if (!response.ok) throw new Error(result.message || result.error || "Failed to update mark");
       
+      setMarks((prev) => prev.map((item) => (item._id === id ? result : item)));
       return result;
     } catch (err) {
       setError(err.message);
@@ -118,18 +129,19 @@ export const useClass = () => {
     }
   }, []);
 
-  // DELETE: Remove a Class
-  const removeClass = useCallback(async (id) => {
+  // DELETE: Remove a Student Mark record
+  const removeMark = useCallback(async (id) => {
     setLoading(true);
     setError(null);
     try {
       const response = await fetch(`${API}/delete/${id}`, {
-        method: "DELETE",
+        method: "DELETE"
       });
       
       const result = await response.json();
-      if (!response.ok) throw new Error(result.message || result.error || "Failed to delete class");
+      if (!response.ok) throw new Error(result.message || result.error || "Failed to delete mark");
       
+      setMarks((prev) => prev.filter((item) => item._id !== id));
       return result;
     } catch (err) {
       setError(err.message);
@@ -140,19 +152,18 @@ export const useClass = () => {
   }, []);
 
   return {
-    classes,
-    classDetails,
+    marks,
+    markDetails,
     pagination,
     loading,
     error,
-    fetchAllClasses,
-    fetchClassesByBranch,
-    getClasses: fetchClassesByBranch, // ✅ This fixes the "getClasses is not a function" error
-    fetchClassById,
-    createClass,
-    updateClass,
-    removeClass,
+    fetchAllMarks,
+    fetchMarksByBranch,
+    fetchMarkById,
+    createMark,
+    updateMark,
+    removeMark,
   };
 };
 
-export default useClass;
+export default useStudentMarks;

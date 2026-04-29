@@ -1,28 +1,29 @@
 import { useState, useCallback } from "react";
 import useAuth from "./useAuth"; 
 
-const API = `${process.env.REACT_APP_BACKEND_URL}/class`;
+const API = `${process.env.REACT_APP_BACKEND_URL}/grade`;
 
-export const useClass = () => {
-  const [classes, setClasses] = useState([]);
-  const [classDetails, setClassDetails] = useState(null);
+export const useGrade = () => {
+  const [grades, setGrades] = useState([]);
+  const [gradeDetails, setGradeDetails] = useState(null);
   const [pagination, setPagination] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   const { branch } = useAuth(); 
 
-  // GET: All Classes (Paginated)
-  const fetchAllClasses = useCallback(async (page = 1, limit = 10) => {
+  // GET: All Grades (Paginated)
+  const fetchAllGrades = useCallback(async (page = 1, limit = 10) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`${API}/?page=${page}&limit=${limit}`);
+      const queryParams = new URLSearchParams({ page, limit });
+      const response = await fetch(`${API}/?${queryParams.toString()}`);
       const result = await response.json();
       
-      if (!response.ok) throw new Error(result.error || "Failed to fetch classes");
+      if (!response.ok) throw new Error(result.error || "Failed to fetch grades");
       
-      setClasses(result.data);
+      setGrades(result.data);
       setPagination(result.pagination);
       return result;
     } catch (err) {
@@ -32,17 +33,18 @@ export const useClass = () => {
     }
   }, []);
 
-  // GET: All Classes by Branch (Paginated)
-  const fetchClassesByBranch = useCallback(async (targetBranch = branch, page = 1, limit = 10) => {
+  // GET: All Grades by Branch (Paginated)
+  const fetchGradesByBranch = useCallback(async (targetBranch = branch, page = 1, limit = 10) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`${API}/${targetBranch}/get-all?page=${page}&limit=${limit}`);
+      const queryParams = new URLSearchParams({ page, limit });
+      const response = await fetch(`${API}/${targetBranch}/get-all?${queryParams.toString()}`);
       const result = await response.json();
       
-      if (!response.ok) throw new Error(result.error || "Failed to fetch branch classes");
+      if (!response.ok) throw new Error(result.error || "Failed to fetch branch grades");
       
-      setClasses(result.data);
+      setGrades(result.data);
       setPagination(result.pagination);
       return result;
     } catch (err) {
@@ -52,17 +54,17 @@ export const useClass = () => {
     }
   }, [branch]);
 
-  // GET: Single Class Details By ID
-  const fetchClassById = useCallback(async (id) => {
+  // GET: Single Grade Details By ID
+  const fetchGradeById = useCallback(async (id) => {
     setLoading(true);
     setError(null);
     try {
       const response = await fetch(`${API}/get-id/${id}`);
       const result = await response.json();
       
-      if (!response.ok) throw new Error(result.message || result.error || "Class not found");
+      if (!response.ok) throw new Error(result.message || result.error || "Grade not found");
       
-      setClassDetails(result);
+      setGradeDetails(result);
       return result;
     } catch (err) {
       setError(err.message);
@@ -71,20 +73,23 @@ export const useClass = () => {
     }
   }, []);
 
-  // POST: Create a new Class
-  const createClass = useCallback(async (classData) => {
+  // POST: Create a new Grade
+  const createGrade = useCallback(async (gradeData) => {
     setLoading(true);
     setError(null);
     try {
-      const payload = { ...classData, branch: classData.branch || branch };
+      const payload = { ...gradeData, branch: gradeData.branch || branch };
+      
       const response = await fetch(`${API}/post`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(payload),
       });
       
       const result = await response.json();
-      if (!response.ok) throw new Error(result.error || "Failed to create class");
+      if (!response.ok) throw new Error(result.error || "Failed to create grade");
       
       return result;
     } catch (err) {
@@ -95,19 +100,21 @@ export const useClass = () => {
     }
   }, [branch]);
 
-  // PUT: Update a Class
-  const updateClass = useCallback(async (id, classData) => {
+  // PUT: Update a Grade
+  const updateGrade = useCallback(async (id, gradeData) => {
     setLoading(true);
     setError(null);
     try {
       const response = await fetch(`${API}/update/${id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(classData),
+        headers: { 
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(gradeData),
       });
       
       const result = await response.json();
-      if (!response.ok) throw new Error(result.message || result.error || "Failed to update class");
+      if (!response.ok) throw new Error(result.message || result.error || "Failed to update grade");
       
       return result;
     } catch (err) {
@@ -118,8 +125,8 @@ export const useClass = () => {
     }
   }, []);
 
-  // DELETE: Remove a Class
-  const removeClass = useCallback(async (id) => {
+  // DELETE: Remove a Grade
+  const removeGrade = useCallback(async (id) => {
     setLoading(true);
     setError(null);
     try {
@@ -128,7 +135,7 @@ export const useClass = () => {
       });
       
       const result = await response.json();
-      if (!response.ok) throw new Error(result.message || result.error || "Failed to delete class");
+      if (!response.ok) throw new Error(result.message || result.error || "Failed to delete grade");
       
       return result;
     } catch (err) {
@@ -140,19 +147,18 @@ export const useClass = () => {
   }, []);
 
   return {
-    classes,
-    classDetails,
+    grades,
+    gradeDetails,
     pagination,
     loading,
     error,
-    fetchAllClasses,
-    fetchClassesByBranch,
-    getClasses: fetchClassesByBranch, // ✅ This fixes the "getClasses is not a function" error
-    fetchClassById,
-    createClass,
-    updateClass,
-    removeClass,
+    fetchAllGrades,
+    fetchGradesByBranch,
+    fetchGradeById,
+    createGrade,
+    updateGrade,
+    removeGrade,
   };
 };
 
-export default useClass;
+export default useGrade;

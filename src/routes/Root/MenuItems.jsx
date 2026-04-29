@@ -102,15 +102,49 @@ const useMenuItems = () => {
 },
 
 
+
+
+
+
   
 
     { title: "Exams", path: "/exams", icon: <MdOutlineEditNote className="text-xl" /> },
+    { title: "Add Marks", path: "/addMarks", icon: <MdOutlineEmojiEvents className="text-xl" /> },
     { title: "Results", path: "/results", icon: <MdOutlineEmojiEvents className="text-xl" /> },
     { title: "Routine", path: "/routine", icon: <MdOutlineSchedule className="text-xl" /> },
     { title: "Salary", path: "/salary", icon: <MdOutlinePayments className="text-xl" /> },
     { title: "Notices", path: "/notices", icon: <MdOutlineNotifications className="text-xl" /> },
     { title: "Calendar", path: "/calendar", icon: <MdOutlineCalendarMonth className="text-xl" /> },
     { title: "Progress", path: "/progress", icon: <MdOutlineTrendingUp className="text-xl" /> },
+
+
+
+        { 
+  title: "Settings",  
+  icon: <MdOutlineFactCheck className="text-xl" />,
+
+  list: [
+    { 
+      title: "Class Time", 
+      path: "/settings/classTime", // Correct router path
+      icon: <MdOutlineFactCheck className="text-xl" /> 
+    },
+   
+{ 
+      title: "Day", 
+      path: "/settings/day", // Correct router path
+      icon: <MdOutlineFactCheck className="text-xl" /> 
+    },
+
+    { 
+      title: "Grade", 
+      path: "/settings/grade", // Correct router path
+      icon: <MdOutlineFactCheck className="text-xl" /> 
+    },
+
+    
+  ]
+},
     // I am keeping logout here, but usually, it's handled separately in the UI (like in the top bar)
     { title: "Logout", path: "/logout", icon: <MdLogout className="text-xl" /> },
   ];
