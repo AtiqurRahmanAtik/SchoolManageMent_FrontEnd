@@ -73,7 +73,7 @@ export const useStudentMarks = () => {
     }
   }, []);
 
-  // POST: Create a new Student Mark
+  // POST: Create a new Student Mark (Updated for Array-Based Logic)
   const createMark = useCallback(async (markData) => {
     setLoading(true);
     setError(null);
@@ -91,8 +91,16 @@ export const useStudentMarks = () => {
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || "Failed to create mark record");
       
-      // Update local state to include the new mark
-      setMarks((prev) => [result.data || result, ...prev]);
+      // Since it uses upsert, we refresh the list or find the student in state
+      setMarks((prev) => {
+        const index = prev.findIndex(item => item.studentId === result.studentId);
+        if (index > -1) {
+          const newMarks = [...prev];
+          newMarks[index] = result;
+          return newMarks;
+        }
+        return [result, ...prev];
+      });
       
       return result;
     } catch (err) {
@@ -103,7 +111,8 @@ export const useStudentMarks = () => {
     }
   }, [branch]);
 
-  // PUT: Update a Student Mark
+  // PUT: Update a Student Mark (Updated for Array positional update)
+  // Expects 'resultId' inside markData to identify which exam record to update
   const updateMark = useCallback(async (id, markData) => {
     setLoading(true);
     setError(null);
@@ -113,7 +122,7 @@ export const useStudentMarks = () => {
         headers: { 
           "Content-Type": "application/json"
         },
-        body: JSON.stringify(markData),
+        body: JSON.stringify(markData), // Should include resultId, mark, grade
       });
       
       const result = await response.json();
@@ -129,19 +138,25 @@ export const useStudentMarks = () => {
     }
   }, []);
 
-  // DELETE: Remove a Student Mark record
-  const removeMark = useCallback(async (id) => {
+  // DELETE: Remove a Student Mark record (Updated to remove entry from array)
+  // Expects resultId to be passed to identify the specific exam entry
+  const removeMark = useCallback(async (id, resultId) => {
     setLoading(true);
     setError(null);
     try {
       const response = await fetch(`${API}/delete/${id}`, {
-        method: "DELETE"
+        method: "DELETE",
+        headers: { 
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ resultId }), // Pass resultId in body for array pull logic
       });
       
       const result = await response.json();
       if (!response.ok) throw new Error(result.message || result.error || "Failed to delete mark");
       
-      setMarks((prev) => prev.filter((item) => item._id !== id));
+      // Update local state with the returned updated student document
+      setMarks((prev) => prev.map((item) => (item._id === id ? result.data : item)));
       return result;
     } catch (err) {
       setError(err.message);

@@ -61,6 +61,8 @@ import ClassTime from "../pages/Dashboard/ClassTime";
 import Day from "../pages/Dashboard/Day";
 import Grade from "../pages/Dashboard/Grade";
 import AddMarks from "../pages/Dashboard/AddMarks";
+import StudentIDCard from "../pages/Dashboard/StudentIDCard";
+import EmployeeIDCard from "../pages/Dashboard/EmployeeIDCard";
 
 
 
@@ -287,6 +289,28 @@ export const router = createBrowserRouter([
         path: "calendar",
         element: <PrivateRoot><Calendar /></PrivateRoot>,
       },
+
+{
+  path: "id-card",
+  children: [
+    {
+      path: "student", // Access via /id-card/student
+      element: (
+        <PrivateRoot>
+          <StudentIDCard />
+        </PrivateRoot>
+      ),
+    },
+    {
+      path: "employee", // Access via /id-card/employee
+      element: (
+        <PrivateRoot>
+          <EmployeeIDCard />
+        </PrivateRoot>
+      ),
+    },
+  ],
+},
       {
         path: "progress",
         element: <PrivateRoot><Progress /></PrivateRoot>,

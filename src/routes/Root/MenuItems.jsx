@@ -115,6 +115,25 @@ const useMenuItems = () => {
     { title: "Salary", path: "/salary", icon: <MdOutlinePayments className="text-xl" /> },
     { title: "Notices", path: "/notices", icon: <MdOutlineNotifications className="text-xl" /> },
     { title: "Calendar", path: "/calendar", icon: <MdOutlineCalendarMonth className="text-xl" /> },
+
+
+{
+  title: "ID Card",
+  icon: <MdOutlineSchool className="text-xl" />, 
+  list: [
+    {
+      title: "Student ID Card",
+      path: "/id-card/student", // Corrected to match the child route
+      icon: <MdOutlineSchool className="text-xl" />,
+    },
+    {
+      title: "Employee ID Card",
+      path: "/id-card/employee", // Corrected to match the child route
+      icon: <MdOutlineSchool className="text-xl" />,
+    },
+  ],
+},
+
     { title: "Progress", path: "/progress", icon: <MdOutlineTrendingUp className="text-xl" /> },
 
 

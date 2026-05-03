@@ -138,7 +138,6 @@ export default function AddMarks() {
       return;
     }
     setSelectedStudent(student);
-    // Fetch subjects for this student's class
     fetchSubjectsByBranch(undefined, student.studentClass, 1, 1000); 
     setMarkData({ subjectId: "", mark: "", grade: "" });
     setFormErrors({});
@@ -153,20 +152,34 @@ export default function AddMarks() {
     setFormErrors({});
   };
 
-  // Validate Form
+  // Validate Form with Grade Range Logic
   const validateForm = () => {
     const errors = {};
+    const currentMark = Number(markData.mark);
 
-    if (!markData.subjectId.trim()) {
+    if (!markData.subjectId || !markData.subjectId.trim()) {
       errors.subjectId = "Subject is required";
     }
-    if (!markData.mark.trim()) {
-      errors.mark = "Mark is required";
-    } else if (isNaN(markData.mark) || markData.mark < 0 || markData.mark > 100) {
-      errors.mark = "Mark must be between 0 and 100";
-    }
-    if (!markData.grade.trim()) {
+
+    if (!markData.grade || !markData.grade.trim()) {
       errors.grade = "Grade is required";
+    }
+
+    if (!markData.mark || markData.mark.toString().trim() === "") {
+      errors.mark = "Mark is required";
+    } else if (isNaN(currentMark) || currentMark < 0 || currentMark > 100) {
+      errors.mark = "Mark must be between 0 and 100";
+    } else if (markData.grade) {
+      // Find the selected grade object to check ranges
+      const selectedGradeObj = grades.find(g => g.gradeName === markData.grade);
+      if (selectedGradeObj) {
+        const min = Number(selectedGradeObj.markFrom || selectedGradeObj.minMark);
+        const max = Number(selectedGradeObj.markUpto || selectedGradeObj.maxMark);
+        
+        if (currentMark < min || currentMark > max) {
+          errors.mark = `For grade ${markData.grade}, marks must be between ${min} and ${max}`;
+        }
+      }
     }
 
     setFormErrors(errors);
@@ -177,12 +190,8 @@ export default function AddMarks() {
   const handleMarkSubmit = async (e) => {
     e.preventDefault();
     
-    // Validate form
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm()) return;
 
-    // Find the subject name from the subjects list
     const subject = subjects.find(s => s._id === markData.subjectId);
 
     const payload = {
@@ -190,29 +199,24 @@ export default function AddMarks() {
       studentName: selectedStudent.studentName,
       studentImage: selectedStudent.studentPhoto || "",
       registrationNo: selectedStudent.registrationNo,
-      examType: appliedFilterExam,
       studentClass: selectedStudent.studentClass,
       section: selectedStudent.section,
+      examType: appliedFilterExam,
+      subjectId: markData.subjectId,
       subjectName: subject ? subject.SubjectName : "",
-      mark: markData.mark, // ✅ Include the mark value
+      mark: Number(markData.mark), 
       grade: markData.grade,
-      // branch is handled automatically inside createMark hook via useAuth
     };
-
-
-    // console.log("send marks : ", payload)
 
     try {
       await createMark(payload);
       toast.success(`✓ Marks added successfully for ${selectedStudent.studentName}`);
       closeModal();
-      // Optionally refresh the students list or marks list
     } catch (err) {
       toast.error(err.message || "Failed to add marks");
     }
   };
 
-  // --- Filtering Logic ---
   const filteredResults = students?.filter((student) => {
     if (appliedFilterClass && student.studentClass !== appliedFilterClass) return false;
     if (appliedFilterSection && student.section !== appliedFilterSection) return false;
@@ -250,8 +254,6 @@ export default function AddMarks() {
         />
 
         <div className="flex flex-wrap items-end gap-4 border-t border-base-200 pt-4">
-          
-          {/* Exam Dropdown */}
           <div className="form-control w-full sm:max-w-xs">
             <label className="label"><span className="label-text font-semibold">Select Exam</span></label>
             <select 
@@ -260,21 +262,13 @@ export default function AddMarks() {
               onChange={(e) => setFilterExam(e.target.value)}
               disabled={examLoading}
             >
-              <option value="">
-                {examLoading ? "Loading exams..." : "All Exams"}
-              </option>
-              {uniqueExams.length > 0 ? (
-                uniqueExams.map((exam, idx) => (
-                  <option key={idx} value={exam}>{exam}</option>
-                ))
-              ) : (
-                <option disabled>No examinations available</option>
-              )}
+              <option value="">{examLoading ? "Loading exams..." : "All Exams"}</option>
+              {uniqueExams.map((exam, idx) => (
+                <option key={idx} value={exam}>{exam}</option>
+              ))}
             </select>
-            {examError && <span className="text-error text-xs mt-1">{examError}</span>}
           </div>
 
-          {/* Class Dropdown */}
           <div className="form-control w-full sm:max-w-xs">
             <label className="label"><span className="label-text font-semibold">Class</span></label>
             <select 
@@ -289,7 +283,6 @@ export default function AddMarks() {
             </select>
           </div>
 
-          {/* Section Dropdown */}
           <div className="form-control w-full sm:max-w-xs">
             <label className="label"><span className="label-text font-semibold">Section</span></label>
             <select 
@@ -305,21 +298,13 @@ export default function AddMarks() {
             </select>
           </div>
 
-          {/* Search Button */}
-          <button onClick={handleFilterSearch} className="btn btn-primary">
-            Search Students
-          </button>
+          <button onClick={handleFilterSearch} className="btn btn-primary">Search Students</button>
           
-          {/* Clear Filters Button */}
           {(appliedFilterClass || appliedFilterSection || appliedFilterExam) && (
             <button 
               onClick={() => {
-                setFilterClass(""); 
-                setFilterSection(""); 
-                setFilterExam(""); 
-                setAppliedFilterClass(""); 
-                setAppliedFilterSection(""); 
-                setAppliedFilterExam("");
+                setFilterClass(""); setFilterSection(""); setFilterExam(""); 
+                setAppliedFilterClass(""); setAppliedFilterSection(""); setAppliedFilterExam("");
                 setCurrentPage(1);
               }} 
               className="btn btn-ghost text-error"
@@ -337,13 +322,10 @@ export default function AddMarks() {
             <thead className="bg-base-200 text-base-content text-sm">
               <tr>
                 {tableHeaders.map((header) => (
-                  <th key={header.id} className={header.className}>
-                    {header.label}
-                  </th>
+                  <th key={header.id} className={header.className}>{header.label}</th>
                 ))}
               </tr>
             </thead>
-            
             <tbody>
               {studentLoading ? (
                 <SkeletonLoader />
@@ -351,9 +333,7 @@ export default function AddMarks() {
                 <tr>
                   <td colSpan={tableHeaders.length} className="py-12 text-center">
                     <MtableLoading data={filteredResults} />
-                    <p className="text-lg font-medium text-base-content/50 mt-[-40px]">
-                      No students found
-                    </p>
+                    <p className="text-lg font-medium text-base-content/50 mt-[-40px]">No students found</p>
                   </td>
                 </tr>
               ) : (
@@ -363,38 +343,21 @@ export default function AddMarks() {
                       <div className="flex items-center space-x-3">
                         <div className="avatar">
                           <div className="mask mask-squircle w-10 h-10 bg-base-200">
-                            <img 
-                              src={student.studentPhoto || `https://ui-avatars.com/api/?name=${encodeURIComponent(student.studentName)}&background=random`} 
-                              alt="student" 
-                            />
+                            <img src={student.studentPhoto || `https://ui-avatars.com/api/?name=${encodeURIComponent(student.studentName)}&background=random`} alt="student" />
                           </div>
                         </div>
                         <div>
                           <div className="font-bold">{student.studentName}</div>
-                          {appliedFilterExam && (
-                            <div className="text-xs text-primary font-medium">
-                              {appliedFilterExam}
-                            </div>
-                          )}
+                          {appliedFilterExam && <div className="text-xs text-primary font-medium">{appliedFilterExam}</div>}
                         </div>
                       </div>
                     </td>
-                    <td className="py-4 hidden sm:table-cell font-medium">
-                      {student.registrationNo || 'N/A'}
-                    </td>
+                    <td className="py-4 hidden sm:table-cell font-medium">{student.registrationNo || 'N/A'}</td>
                     <td className="py-4 hidden md:table-cell">
-                      {student.studentClass}{' '}
-                      <span className="text-primary text-xs ml-1">
-                        ({student.section})
-                      </span>
+                      {student.studentClass} <span className="text-primary text-xs ml-1">({student.section})</span>
                     </td>
                     <td className="py-4 text-right pr-6">
-                      <button 
-                        onClick={() => openAddMarkModal(student)} 
-                        className="btn btn-sm btn-outline btn-primary"
-                      >
-                        Add Mark
-                      </button>
+                      <button onClick={() => openAddMarkModal(student)} className="btn btn-sm btn-outline btn-primary">Add Mark</button>
                     </td>
                   </tr>
                 ))
@@ -407,15 +370,11 @@ export default function AddMarks() {
       {/* Pagination */}
       {!studentLoading && pagination && pagination.totalPages > 1 && (
         <div className="flex justify-center md:justify-end mt-6">
-          <div className="join shadow-sm border border-base-200 rounded-lg bg-base-100">
-            <Pagination 
-              currentPage={currentPage}
-              totalPages={pagination.totalPages || 1}
-              totalItems={pagination.totalItems || 0}
-              itemsPerPage={limit}
-              onPageChange={handlePageChange}
-            />
-          </div>
+          <Pagination 
+            currentPage={currentPage}
+            totalPages={pagination.totalPages || 1}
+            onPageChange={handlePageChange}
+          />
         </div>
       )}
 
@@ -423,38 +382,17 @@ export default function AddMarks() {
       {isModalOpen && (
         <div className="modal modal-open backdrop-blur">
           <div className="modal-box max-w-md w-full">
-            {/* Modal Header */}
-            <h3 className="font-bold text-lg mb-2 text-primary border-b pb-3">
-              Add Mark
-            </h3>
+            <h3 className="font-bold text-lg mb-2 text-primary border-b pb-3">Add Mark</h3>
             
-            {/* Student Info */}
             <div className="mb-4 p-3 bg-base-200 rounded-lg">
-              <p className="text-sm font-semibold text-base-content">
-                {selectedStudent?.studentName}
-              </p>
-              <p className="text-xs text-base-content/70 mt-1">
-                Reg No: {selectedStudent?.registrationNo}
-              </p>
-              <p className="text-xs text-base-content/70">
-                Class: {selectedStudent?.studentClass} | Section: {selectedStudent?.section}
-              </p>
-              <p className="text-xs text-base-content/70">
-                Exam: <span className="text-primary font-semibold">{appliedFilterExam}</span>
-              </p>
+              <p className="text-sm font-semibold">{selectedStudent?.studentName}</p>
+              <p className="text-xs text-base-content/70">Exam: <span className="text-primary font-semibold">{appliedFilterExam}</span></p>
             </div>
 
-            {/* Mark Form */}
             <form onSubmit={handleMarkSubmit} className="space-y-4">
-              
-              {/* Subject Selection */}
+              {/* Subject Select */}
               <div className="form-control">
-                <label className="label">
-                  <span className="label-text font-semibold">Select Subject *</span>
-                  <span className="label-text-alt text-primary text-xs">
-                    {subjects?.length > 0 ? `${subjects.length} subject(s)` : "No subjects"}
-                  </span>
-                </label>
+                <label className="label"><span className="label-text font-semibold">Select Subject *</span></label>
                 <select 
                   className={`select select-bordered w-full ${formErrors.subjectId ? "select-error" : ""}`}
                   value={markData.subjectId}
@@ -465,33 +403,38 @@ export default function AddMarks() {
                 >
                   <option value="">Choose a subject</option>
                   {subjects?.map((subj) => (
-                    <option key={subj._id} value={subj._id}>
-                      {subj.SubjectName} {subj.SubjectCode ? `(${subj.SubjectCode})` : ''}
-                    </option>
+                    <option key={subj._id} value={subj._id}>{subj.SubjectName}</option>
                   ))}
                 </select>
-                {formErrors.subjectId && (
-                  <label className="label"><span className="label-text-alt text-error">{formErrors.subjectId}</span></label>
-                )}
-                {subjects?.length === 0 && !formErrors.subjectId && (
-                  <label className="label"><span className="label-text-alt text-warning">No subjects available for this class</span></label>
-                )}
+                {formErrors.subjectId && <label className="label-text-alt text-error ml-1">{formErrors.subjectId}</label>}
               </div>
               
-              {/* Mark & Grade Row */}
               <div className="grid grid-cols-2 gap-4">
-                
+                {/* Grade Select */}
+                <div className="form-control">
+                  <label className="label"><span className="label-text font-semibold">Grade *</span></label>
+                  <select 
+                    className={`select select-bordered w-full ${formErrors.grade ? "select-error" : ""}`}
+                    value={markData.grade}
+                    onChange={(e) => {
+                      setMarkData({...markData, grade: e.target.value});
+                      setFormErrors({...formErrors, grade: "", mark: ""});
+                    }}
+                  >
+                    <option value="">Select</option>
+                    {grades?.map((g) => (
+                      <option key={g._id} value={g.gradeName}>{g.gradeName}</option>
+                    ))}
+                  </select>
+                  {formErrors.grade && <label className="label-text-alt text-error ml-1">{formErrors.grade}</label>}
+                </div>
+
                 {/* Mark Input */}
                 <div className="form-control">
-                  <label className="label">
-                    <span className="label-text font-semibold">Mark (0-100) *</span>
-                  </label>
+                  <label className="label"><span className="label-text font-semibold">Mark *</span></label>
                   <input 
                     type="number" 
                     placeholder="0" 
-                    min="0"
-                    max="100"
-                    step="0.5"
                     className={`input input-bordered w-full ${formErrors.mark ? "input-error" : ""}`}
                     value={markData.mark}
                     onChange={(e) => {
@@ -499,83 +442,18 @@ export default function AddMarks() {
                       setFormErrors({...formErrors, mark: ""});
                     }}
                   />
-                  {formErrors.mark && (
-                    <label className="label"><span className="label-text-alt text-error">{formErrors.mark}</span></label>
-                  )}
-                </div>
-
-                {/* Grade Selection */}
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text font-semibold">Grade *</span>
-                  </label>
-                  <select 
-                    className={`select select-bordered w-full ${formErrors.grade ? "select-error" : ""}`}
-                    value={markData.grade}
-                    onChange={(e) => {
-                      setMarkData({...markData, grade: e.target.value});
-                      setFormErrors({...formErrors, grade: ""});
-                    }}
-                  >
-                    <option value="">Select</option>
-                    {grades?.map((g) => (
-                      <option key={g._id} value={g.gradeName}>
-                        {g.gradeName}
-                      </option>
-                    ))}
-                  </select>
-                  {formErrors.grade && (
-                    <label className="label"><span className="label-text-alt text-error">{formErrors.grade}</span></label>
-                  )}
-                  {grades?.length === 0 && !formErrors.grade && (
-                    <label className="label"><span className="label-text-alt text-warning">No grades defined</span></label>
-                  )}
+                  {formErrors.mark && <label className="label-text-alt text-error ml-1">{formErrors.mark}</label>}
                 </div>
               </div>
 
-              {/* Form Error Message */}
-              {marksError && (
-                <div className="alert alert-error shadow-sm">
-                  <span className="text-sm">{marksError}</span>
-                </div>
-              )}
-
-              {/* Modal Actions */}
-              <div className="modal-action gap-2 mt-6 border-t pt-4">
-                <button 
-                  type="button" 
-                  className="btn btn-ghost btn-sm"
-                  onClick={closeModal}
-                  disabled={marksLoading}
-                >
-                  Cancel
-                </button>
-                <button 
-                  type="submit" 
-                  className="btn btn-primary btn-sm gap-2"
-                  disabled={
-                    subjects?.length === 0 || 
-                    marksLoading || 
-                    grades?.length === 0
-                  }
-                >
-                  {marksLoading ? (
-                    <>
-                      <span className="loading loading-spinner loading-sm"></span>
-                      Saving...
-                    </>
-                  ) : (
-                    "Save Mark"
-                  )}
+              <div className="modal-action border-t pt-4">
+                <button type="button" className="btn btn-ghost btn-sm" onClick={closeModal} disabled={marksLoading}>Cancel</button>
+                <button type="submit" className="btn btn-primary btn-sm" disabled={marksLoading}>
+                  {marksLoading ? <span className="loading loading-spinner loading-xs"></span> : "Save Mark"}
                 </button>
               </div>
             </form>
           </div>
-
-          {/* Modal Backdrop */}
-          <form method="dialog" className="modal-backdrop">
-            <button onClick={closeModal}>close</button>
-          </form>
         </div>
       )}
     </div>

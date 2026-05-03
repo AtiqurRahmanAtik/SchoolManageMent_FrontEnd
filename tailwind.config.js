@@ -7,6 +7,9 @@ module.exports = {
   ],
   theme: {
     extend: {
+       screens: {
+        'print': { 'raw': 'print' },
+      },
       colors: {
         primary: "#cd731c",
         secondary: "#28282B",

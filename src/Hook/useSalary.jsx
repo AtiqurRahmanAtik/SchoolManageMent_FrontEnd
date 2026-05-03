@@ -1,21 +1,18 @@
 import { useState, useCallback } from "react";
 import useAuth from "./useAuth"; 
 
-// Updated to match backend registration: routes.use("/grades", GradeRoutes);
-const API = `${process.env.REACT_APP_BACKEND_URL}/grades`;
+const API = `${process.env.REACT_APP_BACKEND_URL}/salary`;
 
-export const useGrade = () => {
-  const [grades, setGrades] = useState([]);
-  const [gradeDetails, setGradeDetails] = useState(null);
+export const useSalary = () => {
+  const [salaries, setSalaries] = useState([]);
+  const [salaryDetails, setSalaryDetails] = useState(null);
   const [pagination, setPagination] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   const { branch } = useAuth(); 
 
-  // GET: All Grades (Paginated)
-  // Matches backend: GradeRoutes.get("/", getAllGrades);
-  const fetchAllGrades = useCallback(async (page = 1, limit = 10, search = "") => {
+  const fetchAllSalaries = useCallback(async (page = 1, limit = 10, search = "") => {
     setLoading(true);
     setError(null);
     try {
@@ -23,9 +20,9 @@ export const useGrade = () => {
       const response = await fetch(`${API}/?${queryParams.toString()}`);
       const result = await response.json();
       
-      if (!response.ok) throw new Error(result.message || "Failed to fetch grades");
+      if (!response.ok) throw new Error(result.message || "Failed to fetch salaries");
       
-      setGrades(result.data);
+      setSalaries(result.data);
       setPagination(result.pagination);
       return result;
     } catch (err) {
@@ -35,22 +32,18 @@ export const useGrade = () => {
     }
   }, []);
 
-  // GET: All Grades by Branch 
-  // Matches backend: GradeRoutes.get("/:branch/get-all", getGradesByBranch);
-  const fetchGradesByBranch = useCallback(async (targetBranch = branch, page = 1, limit = 10, search = "") => {
+  const fetchSalariesByBranch = useCallback(async (targetBranch = branch, page = 1, limit = 10, search = "") => {
     if (!targetBranch) return;
     setLoading(true);
     setError(null);
     try {
       const queryParams = new URLSearchParams({ page, limit, search });
-      
-      // matches /grades/:branch/get-all
       const response = await fetch(`${API}/${targetBranch}/get-all?${queryParams.toString()}`);
       const result = await response.json();
       
-      if (!response.ok) throw new Error(result.message || "Failed to fetch branch grades");
+      if (!response.ok) throw new Error(result.message || "Failed to fetch branch salaries");
       
-      setGrades(result.data);
+      setSalaries(result.data);
       setPagination(result.pagination);
       return result;
     } catch (err) {
@@ -60,18 +53,16 @@ export const useGrade = () => {
     }
   }, [branch]);
 
-  // GET: Single Grade Details By ID
-  // Matches backend: GradeRoutes.get("/get-id/:id", getGradeById);
-  const fetchGradeById = useCallback(async (id) => {
+  const fetchSalaryById = useCallback(async (id) => {
     setLoading(true);
     setError(null);
     try {
       const response = await fetch(`${API}/get-id/${id}`);
       const result = await response.json();
       
-      if (!response.ok) throw new Error(result.message || "Grade not found");
+      if (!response.ok) throw new Error(result.message || "Salary not found");
       
-      setGradeDetails(result.data);
+      setSalaryDetails(result);
       return result;
     } catch (err) {
       setError(err.message);
@@ -80,13 +71,11 @@ export const useGrade = () => {
     }
   }, []);
 
-  // POST: Create a new Grade
-  // Matches backend: GradeRoutes.post("/post", createGrade);
-  const createGrade = useCallback(async (gradeData) => {
+  const createSalary = useCallback(async (salaryData) => {
     setLoading(true);
     setError(null);
     try {
-      const payload = { ...gradeData, branch: gradeData.branch || branch };
+      const payload = { ...salaryData, branch: salaryData.branch || branch };
       
       const response = await fetch(`${API}/post`, {
         method: "POST",
@@ -97,7 +86,7 @@ export const useGrade = () => {
       });
       
       const result = await response.json();
-      if (!response.ok) throw new Error(result.message || "Failed to create grade");
+      if (!response.ok) throw new Error(result.message || "Failed to create salary");
       
       return result;
     } catch (err) {
@@ -108,9 +97,7 @@ export const useGrade = () => {
     }
   }, [branch]);
 
-  // PUT: Update a Grade
-  // Matches backend: GradeRoutes.put("/update/:id", updateGrade);
-  const updateGrade = useCallback(async (id, gradeData) => {
+  const updateSalary = useCallback(async (id, salaryData) => {
     setLoading(true);
     setError(null);
     try {
@@ -119,11 +106,11 @@ export const useGrade = () => {
         headers: { 
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(gradeData),
+        body: JSON.stringify(salaryData),
       });
       
       const result = await response.json();
-      if (!response.ok) throw new Error(result.message || "Failed to update grade");
+      if (!response.ok) throw new Error(result.message || "Failed to update salary");
       
       return result;
     } catch (err) {
@@ -134,9 +121,7 @@ export const useGrade = () => {
     }
   }, []);
 
-  // DELETE: Remove a Grade
-  // Matches backend: GradeRoutes.delete("/delete/:id", removeGrade);
-  const removeGrade = useCallback(async (id) => {
+  const removeSalary = useCallback(async (id) => {
     setLoading(true);
     setError(null);
     try {
@@ -145,7 +130,7 @@ export const useGrade = () => {
       });
       
       const result = await response.json();
-      if (!response.ok) throw new Error(result.message || "Failed to delete grade");
+      if (!response.ok) throw new Error(result.message || "Failed to delete salary");
       
       return result;
     } catch (err) {
@@ -157,18 +142,18 @@ export const useGrade = () => {
   }, []);
 
   return {
-    grades,
-    gradeDetails,
+    salaries,
+    salaryDetails,
     pagination,
     loading,
     error,
-    fetchAllGrades,
-    fetchGradesByBranch,
-    fetchGradeById,
-    createGrade,
-    updateGrade,
-    removeGrade,
+    fetchAllSalaries,
+    fetchSalariesByBranch,
+    fetchSalaryById,
+    createSalary,
+    updateSalary,
+    removeSalary,
   };
 };
 
-export default useGrade;
+export default useSalary;
