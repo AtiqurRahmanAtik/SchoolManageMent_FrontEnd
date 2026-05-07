@@ -138,36 +138,61 @@ export default function StudentIDCard() {
     <div className="p-4 md:p-8 max-w-7xl mx-auto font-sans relative">
       <ToastContainer position="top-right" autoClose={3000} />
 
-      {/* Print Specific Styles - TARGETS MODAL CONTENT ONLY */}
+      {/* ✅ 🔥 FIXED PRINT CSS */}
       <style>
         {`
           @media print {
+            @page {
+              margin: 0; /* Remove default browser page margins */
+              size: auto;
+            }
+            body {
+              margin: 0;
+              padding: 0;
+              -webkit-print-color-adjust: exact !important; /* Force colors */
+              print-color-adjust: exact !important;
+            }
             body * {
               visibility: hidden;
             }
-            #printable-id-card, #printable-id-card * {
+            #printable-id-card,
+            #printable-id-card * {
               visibility: visible !important;
             }
             #printable-id-card {
-              position: fixed;
-              left: 0;
-              top: 0;
-              width: 100vw;
-              height: 100vh;
+              position: fixed !important; /* Lock to viewport */
+              left: 0 !important;
+              top: 0 !important;
+              width: 100vw !important;
+              height: auto !important;
+              
               display: flex !important;
-              flex-direction: row !important;
-              align-items: flex-start !important;
+              flex-direction: row !important; /* 🔥 FORCE SIDE BY SIDE */
               justify-content: center !important;
-              gap: 20px !important;
+              align-items: flex-start !important; /* Push to the very top */
+              gap: 40px !important;
+              
+              padding-top: 40px !important; /* Small breathing room from top edge */
               background: white !important;
-              margin: 0;
-              padding: 20px;
+              margin: 0 !important;
             }
+            /* 🔥 VERY IMPORTANT: prevent breaking */
+            #printable-id-card > div {
+              page-break-inside: avoid;
+              break-inside: avoid;
+            }
+            /* 🔥 Remove modal restrictions */
             .modal-box {
-               background: none !important;
-               box-shadow: none !important;
-               max-width: none !important;
-               width: 100% !important;
+              position: absolute !important;
+              top: 0 !important;
+              left: 0 !important;
+              overflow: visible !important;
+              max-width: none !important;
+              width: 100% !important;
+              background: none !important;
+              box-shadow: none !important;
+              margin: 0 !important;
+              transform: none !important;
             }
             .no-print {
               display: none !important;
@@ -386,8 +411,8 @@ export default function StudentIDCard() {
           {viewData && (
             <div id="printable-id-card" className="flex flex-col md:flex-row items-center justify-center gap-8 py-4">
               
-              {/* FRONT SIDE */}
-              <div className="w-[320px] h-[480px] bg-white rounded-2xl overflow-hidden shadow-2xl flex flex-col relative text-slate-800 border border-slate-200">
+              {/* FRONT SIDE - ✅ Added shrink-0 print:scale-100 */}
+              <div className="w-[320px] h-[480px] shrink-0 print:scale-100 bg-white rounded-2xl overflow-hidden shadow-2xl flex flex-col relative text-slate-800 border border-slate-200">
                 {/* Header Background Design */}
                 <div className="h-44 bg-slate-800 relative overflow-hidden">
                   <div className="absolute top-0 right-0 w-48 h-48 bg-primary rotate-45 translate-x-20 -translate-y-20"></div>
@@ -456,8 +481,8 @@ export default function StudentIDCard() {
                 </div>
               </div>
 
-              {/* BACK SIDE */}
-              <div className="w-[320px] h-[480px] bg-slate-800 rounded-2xl overflow-hidden shadow-2xl flex flex-col relative text-white border border-slate-700">
+              {/* BACK SIDE - ✅ Added shrink-0 print:scale-100 */}
+              <div className="w-[320px] h-[480px] shrink-0 print:scale-100 bg-slate-800 rounded-2xl overflow-hidden shadow-2xl flex flex-col relative text-white border border-slate-700">
                 <div className="p-8 flex flex-col h-full">
                   <div className="border-l-4 border-primary pl-4 mb-8">
                     <h3 className="text-lg font-bold uppercase tracking-widest">Instructions</h3>
@@ -501,7 +526,16 @@ export default function StudentIDCard() {
           {/* Action Buttons */}
           <div className="modal-action no-print flex justify-between items-center mt-8 pt-4 border-t border-base-content/10">
             <button onClick={() => setIsViewModalOpen(false)} className="btn btn-ghost">Close</button>
-            <button onClick={() => window.print()} className="btn btn-primary px-10">
+            
+            {/* ✅ 🔥 FIXED PRINT TIMEOUT */}
+            <button 
+              onClick={() => {
+                setTimeout(() => {
+                  window.print();
+                }, 300);
+              }} 
+              className="btn btn-primary px-10"
+            >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
               </svg>

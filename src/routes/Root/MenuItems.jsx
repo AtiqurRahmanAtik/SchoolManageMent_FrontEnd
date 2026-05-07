@@ -21,6 +21,27 @@ import {
 const useMenuItems = () => {
   const allItems = [
     { title: "Dashboard", path: "/dashboard", icon: <MdDashboard className="text-xl" /> },
+
+    { 
+  title: "WebsiteManagement",
+  icon: <MdOutlineSchool className="text-xl" />, 
+  list: [
+    {
+      title: "Banner",
+      // FIXED: Changed from "/Banner" to match the nested route
+      path: "/website-management/banner", 
+      icon: <MdOutlineSchool className="text-xl" />,
+    },
+     {
+      title: "Our Activities",
+      path: "/website-management/our-activities", // Example of how the next one would look
+      icon: <MdOutlineSchool className="text-xl" />,
+    },
+  ]
+}
+,
+
+    { title: "Institute Profile", path: "/instituteProfile", icon: <MdOutlinePeople className="text-xl" /> },
     { title: "Students", path: "/students", icon: <MdOutlinePeople className="text-xl" /> },
     { title: "Admissions", path: "/admissions", icon: <MdOutlinePersonAdd className="text-xl" /> },
     { title: "Teachers", path: "/teachers", icon: <MdOutlineSchool className="text-xl" /> },
@@ -134,7 +155,7 @@ const useMenuItems = () => {
   ],
 },
 
-    { title: "Progress", path: "/progress", icon: <MdOutlineTrendingUp className="text-xl" /> },
+   
 
 
 

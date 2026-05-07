@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import useAuth from "./useAuth";
 // Import useAuth from your authentication context path
 // import { useAuth } from "../../context/AuthContext"; 
 
@@ -6,7 +7,7 @@ const API = `${process.env.REACT_APP_BACKEND_URL}/notice`;
 
 const useNotice = () => {
   // Assuming useAuth provides the current branch
-  // const { branch } = useAuth(); 
+  const { branch } = useAuth(); 
 
   const [notices, setNotices] = useState([]);
   const [singleNotice, setSingleNotice] = useState(null);
@@ -77,12 +78,15 @@ const useNotice = () => {
     setLoading(true);
     setError(null);
     try {
+
+        const payload = { ...noticeData, branch: noticeData.branch || branch };
+      
       const response = await fetch(`${API}/post`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(noticeData),
+        body: JSON.stringify(payload),
       });
       const result = await response.json();
 

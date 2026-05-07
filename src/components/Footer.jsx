@@ -1,146 +1,124 @@
-import { Headphones, Facebook, Instagram, Youtube, Music2 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import React from 'react';
+import { MapPin, Phone, Mail, Globe, Facebook, Twitter, Youtube, Instagram, Send } from 'lucide-react';
 
 const Footer = () => {
-  
-  const aboutLinks = [
-    { name: 'About Us', path: '/about' },
-    { name: 'Contact', path: '/contact' },
-    { name: 'FAQ', path: '/faq' },
-    { name: 'Blog', path: '/blog' },
-    { name: 'Sitemap', path: '/sitemap' },
-  ];
-
-  const policyLinks = [
-    { name: 'Terms of Use', path: '/termsOfUse' },
-    { name: 'Privacy Policy', path: '/privacy' },
-    { name: 'Cookies Policy', path: '/cookies' },
-    { name: 'Refund Policy', path: '/refund' },
-  ];
-
-  const categoryLinks = [
-    { name: 'Necklaces', path: '/shop/necklaces' },
-    { name: 'Rings', path: '/shop/rings' },
-    { name: 'Churi', path: '/shop/churi' },
-    { name: 'Chain', path: '/shop/chain' },
-    { name: 'Shitahar', path: '/shop/shitahar' },
-    { name: 'Locket', path: '/shop/locket' },
-  ];
+  const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-white pt-16 pb-6 border-t border-gray-200">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-4 mb-12">
-          
-          {/* Brand Section */}
-          <div className="flex flex-col items-start lg:items-center">
-            <img 
-              src="/kunjo-logo.png" 
-              alt="Kunjo Jewellers" 
-              className="h-24 object-contain mb-2"
-              onError={(e) => {
-                e.target.style.display = 'none';
-                e.target.nextSibling.style.display = 'block';
-              }}
-            />
-            <div className="hidden text-center">
-              <h2 className="text-2xl font-serif text-[#d4af37] font-bold uppercase tracking-widest">Kunjo</h2>
-              <p className="text-[10px] uppercase tracking-widest font-semibold text-black">Jewellers</p>
-              <p className="text-[10px] text-gray-500 italic mt-1">Gold & Diamond</p>
-            </div>
-          </div>
-
-          {/* About & Policies */}
-          <div>
-            <h4 className="text-base font-semibold text-gray-900 mb-5">About Kunjo</h4>
-            <ul className="flex flex-col gap-3 mb-6">
-              {aboutLinks.map((link, index) => (
-                <li key={index}>
-                  <Link to={link.path} className="text-[14px] text-gray-500 hover:text-[#d4af37] transition-colors">
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          
-            <h4 className="text-sm font-semibold text-gray-900 mb-3">Legal</h4>
-           
-            <ul className="flex flex-col gap-2">
-              {policyLinks.map((link, index) => (
-                <li key={index}>
-                  <Link to={link.path} className="text-[13px] text-gray-400 hover:text-[#d4af37] transition-colors">
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Categories */}
-          <div>
-            <h4 className="text-base font-semibold text-gray-900 mb-5">Popular Categories</h4>
-            <ul className="flex flex-col gap-3">
-              {categoryLinks.map((link, index) => (
-                <li key={index}>
-                  <Link to={link.path} className="text-[14px] text-gray-500 hover:text-[#d4af37] transition-colors">
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Store Details */}
-          <div>
-            <h4 className="text-base font-semibold text-gray-900 mb-5">Store Details</h4>
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-400">
-                <Headphones size={20} />
-              </div>
-              <div>
-                <p className="text-[12px] text-gray-500">Need Any Help?</p>
-                <p className="text-lg font-medium text-gray-800 tracking-wide">01716-522922</p>
-              </div>
-            </div>
-            <div className="text-[14px] text-gray-500 leading-relaxed mb-3">
-              <span className="font-medium text-gray-700">Address:</span> Jamuna Future Park Level<br />
-              02 Block A Shop No 28<br />
-              Bashundhara Dhaka-1229
-            </div>
-            <div className="text-[14px] text-gray-500">
-              <span className="font-medium text-gray-700">Email:</span> KunjoJewellers@gmail.com
-            </div>
-          </div>
-
-          {/* Social Media */}
-          <div>
-            <h4 className="text-base font-semibold text-gray-900 mb-5">Follow Us</h4>
-            <div className="flex items-center gap-4 text-gray-800">
-              <a href="#" className="hover:text-[#d4af37] transition-colors">
-                <Facebook size={20} strokeWidth={1.5} />
-              </a>
-              <a href="#" className="hover:text-[#d4af37] transition-colors">
-                <Music2 size={20} strokeWidth={1.5} /> 
-              </a>
-              <a href="#" className="hover:text-[#d4af37] transition-colors">
-                <Instagram size={20} strokeWidth={1.5} />
-              </a>
-              <a href="#" className="hover:text-[#d4af37] transition-colors">
-                <Youtube size={22} strokeWidth={1.5} />
-              </a>
-            </div>
-          </div>
-
-        </div>
-
-        <div className="border-t border-gray-200 pt-6 mt-8 flex flex-col items-center gap-4">
-          <p className="text-[13px] text-gray-500 text-center">
-            &copy; 2026 All Rights Reserved By Kunjo Jewellers. Designed & Maintained By Imran Sadik.
-          </p>
-        </div>
-
+    <footer className="relative w-full bg-white pt-16 pb-6 overflow-hidden">
+      {/* Playful Grid Background Effect */}
+      <div className="absolute inset-0 opacity-5 pointer-events-none" 
+           style={{ backgroundImage: 'linear-gradient(#000 1px, transparent 1px), linear-gradient(90deg, #000 1px, transparent 1px)', size: '20px 20px' }}>
       </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+          
+          {/* Section 1: Logo & Contact */}
+          <div className="space-y-6">
+            <div className="text-4xl font-black tracking-tighter">
+              <span className="text-purple-600">k</span>
+              <span className="text-purple-600">i</span>
+              <span className="text-cyan-500">t</span>
+              <span className="text-cyan-500">t</span>
+              <span className="text-orange-500">u</span>
+              <span className="text-orange-500">u</span>
+            </div>
+            
+            <div className="space-y-4 text-gray-600">
+              <div className="flex items-start gap-3">
+                <MapPin className="w-5 h-5 text-purple-600 mt-1 flex-shrink-0" />
+                <p className="text-sm">503 Old Buffalo Street<br />Northwest #205, New York-3087</p>
+              </div>
+              <div className="flex items-center gap-3">
+                <Phone className="w-5 h-5 text-orange-500 flex-shrink-0" />
+                <p className="text-sm">+3453-909-6565<br />+2390-875-2235</p>
+              </div>
+              <div className="flex items-center gap-3">
+                <Mail className="w-5 h-5 text-cyan-500 flex-shrink-0" />
+                <p className="text-sm">infoname@gmail.com</p>
+              </div>
+              <div className="flex items-center gap-3">
+                <Globe className="w-5 h-5 text-cyan-500 flex-shrink-0" />
+                <p className="text-sm">www.yourcompany.com</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Section 2: Useful Links */}
+          <div>
+            <h3 className="text-xl font-bold text-purple-800 mb-6 relative inline-block">
+              Useful Links
+              <span className="absolute -bottom-2 left-0 w-12 h-1 bg-purple-600"></span>
+            </h3>
+            <div className="grid grid-cols-2 gap-2 text-gray-600">
+              {['Home', 'About', 'Services', 'Class', 'Teacher', 'Event', 'Blog', 'Blog Details', 'Contact', 'Error 404'].map((link) => (
+                <a key={link} href="#" className="text-sm hover:text-purple-600 flex items-center gap-1 transition-colors">
+                  <span className="text-purple-400">›</span> {link}
+                </a>
+              ))}
+            </div>
+          </div>
+
+          {/* Section 3: Recent Posts */}
+          <div>
+            <h3 className="text-xl font-bold text-purple-800 mb-6 relative inline-block">
+              Recent Posts
+              <span className="absolute -bottom-2 left-0 w-12 h-1 bg-purple-600"></span>
+            </h3>
+            <div className="space-y-4">
+              {[1, 2].map((post) => (
+                <div key={post} className="flex gap-4 group cursor-pointer">
+                  <div className="bg-purple-600 text-white p-2 rounded text-center min-w-[50px] h-fit">
+                    <p className="text-xs font-bold">28</p>
+                    <p className="text-[10px] uppercase">June</p>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold text-purple-900 group-hover:text-orange-500 transition-colors">Welcome to Responsive Retina Theme</h4>
+                    <p className="text-xs text-gray-500">Design</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Section 4: Newsletter */}
+          <div className="relative">
+            <h3 className="text-xl font-bold text-purple-800 mb-6 relative inline-block">
+              Newsletter
+              <span className="absolute -bottom-2 left-0 w-12 h-1 bg-purple-600"></span>
+            </h3>
+            <p className="text-sm text-gray-600 mb-6">Thank you for visiting us. Please subscribe to our newsletter today.</p>
+            
+            <div className="flex shadow-sm rounded-lg overflow-hidden mb-6">
+              <input 
+                type="email" 
+                placeholder="Email Here" 
+                className="w-full px-4 py-2 text-sm border-none bg-gray-50 focus:ring-2 focus:ring-purple-200 outline-none"
+              />
+              <button className="bg-purple-600 text-white px-4 py-2 text-sm font-bold hover:bg-purple-700 transition-colors">
+                Subscribe
+              </button>
+            </div>
+
+            <div className="flex gap-2">
+              {[Facebook, Twitter, Youtube, Instagram].map((Icon, i) => (
+                <a key={i} href="#" className="w-8 h-8 rounded-full bg-purple-600 text-white flex items-center justify-center hover:bg-orange-500 transition-all hover:-translate-y-1">
+                  <Icon size={16} />
+                </a>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Footer Bottom */}
+        <div className="mt-16 pt-6 border-t border-gray-100 text-center text-sm text-gray-500">
+          <p>© {currentYear} <span className="text-purple-600 font-bold">RS Theme</span>. All Rights Reserved.</p>
+        </div>
+      </div>
+
+      {/* Decorative Grass Image Placeholder (Bottom) */}
+      <div className="absolute bottom-0 w-full h-12 bg-gradient-to-t from-green-100 to-transparent opacity-40"></div>
     </footer>
   );
 };

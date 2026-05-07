@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 
+
 // Custom CSS to match Cal.PNG and cal2.PNG style
 const calendarStyles = `
   .custom-calendar {
@@ -139,10 +140,13 @@ export default function AppCalendar() {
     
     // Check specific holidays
     const foundHoliday = holidayList.find(h => h.date === dateStr);
+    console.log("foundHoliday : ", foundHoliday)
     
     // Highlight ONLY Friday (5) and Saturday (6) as weekends
     // Sunday (0) is NOT a weekend - treated as normal working day
     const isWeekend = date.getDay() === 5 || date.getDay() === 6;
+
+    console.log("IsWeekend name :",isWeekend)
 
     return foundHoliday || isWeekend;
   };
@@ -168,12 +172,16 @@ export default function AppCalendar() {
     return "Working Day";
   };
 
+
   const tileClassName = ({ date, view }) => {
     if (view === 'month' && isHoliday(date)) {
       return 'holiday-text';
     }
     return null;
   };
+
+
+
 
   return (
     <div className="min-h-screen bg-base-200 p-4 md:p-10 flex flex-col items-center">

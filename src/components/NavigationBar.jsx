@@ -1,282 +1,134 @@
-import { NavLink } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Menu, X } from 'lucide-react';
+import { NavLink } from 'react-router-dom'; 
+import { useInstituteProfile } from '../Hook/useInstituteProfile'; // Adjust path as needed
 
-import { 
+export default function NavigationBar() {
+  const [isOpen, setIsOpen] = useState(false);
 
-  Search, 
+  // --- Institute Profile API Integration ---
+  const { instituteProfiles, fetchInstituteProfilesByBranch } = useInstituteProfile();
 
-  User, 
+  useEffect(() => {
+    // Fetch profile data when the component mounts
+    fetchInstituteProfilesByBranch();
+  }, [fetchInstituteProfilesByBranch]);
 
-  Heart, 
+  // Extract the current profile to get the dynamic logo
+  const currentProfile = instituteProfiles && instituteProfiles.length > 0 ? instituteProfiles[0] : null;
+  // Fallback to 'image' if 'logo' isn't the exact property name in your DB schema
+  const logoUrl = currentProfile?.instituteLogo || currentProfile?.image; 
 
-  ShoppingCart, 
+  const toggleMenu = () => {
+    setIsOpen(!isOpen);
+  };
 
-  ChevronDown, 
+  // Updated navItems with real paths
+  const navItems = [
+    { name: 'HOME', href: '/' },
+    { name: 'ABOUT US', href: '/about' },
+    { name: 'TEACHER', href: '/teacher' },
+    { name: 'CLASSES', href: '/classes' },
+    { name: 'PAGES', href: '/pages' },
+    { name: 'BLOG', href: '/blog' },
+    { name: 'CONTACT', href: '/contact' },
+  ];
 
-  Phone, 
+  // Helper function to keep code clean for styles
+  const getLinkStyles = (isActive) => 
+    `px-4 py-2 rounded-full text-sm font-bold transition-all duration-300 ${
+      isActive 
+        ? 'text-orange-500 bg-orange-50' 
+        : 'text-purple-700 hover:text-purple-900 hover:bg-purple-50'
+    }`;
 
-  MapPin, 
-
-  Menu, 
-
-  ChevronRight
-
-} from 'lucide-react';
-
-import { useEffect } from 'react';
-
-
-
-import navLogo from "../assets/Logo/logo.svg";
-
-
-
-const NavigationBar = () => {
-
-
-
-
-
-
-
- 
-
-
-const navItems = [
-
-  { id: 1, name: 'HOME', path: '/' },
-
-  { id: 2, name: 'SHOP', path: '/shop' },
-
-
-];
-
- 
-
-  const pageLinks = navItems.map((item) => (
-
-    <li key={item.id}>
-
-      <NavLink 
-
-        to={item.path}
-
-        className={({ isActive }) =>
-
-          `uppercase font-bold text-[13px] tracking-wide bg-transparent transition-all ${
-
-            isActive 
-
-              ? 'border-b-2 border-black rounded-none text-black pb-1' 
-
-              : 'text-gray-700 hover:text-black hover:bg-transparent'
-
-          }`
-
-        }
-
-      >
-
-       {item.name}
-
-      </NavLink>
-
-    </li>
-
-  ));
-
-
+  const getMobileLinkStyles = (isActive) =>
+    `block px-4 py-3 rounded-xl text-base font-bold transition-colors ${
+      isActive
+        ? 'text-orange-500 bg-orange-50'
+        : 'text-purple-700 hover:bg-purple-50'
+    }`;
 
   return (
-
-    <header className="w-full bg-base-100 shadow-sm">
-
-      
-
-      <nav className="navbar px-4 md:px-8 border-b border-gray-100 py-3">
-
-        
-
-        <div className="navbar-start">
-
-          {/* Mobile Hamburger Menu */}
-
-          <div className="dropdown lg:hidden">
-
-            <div tabIndex={0} role="button" className="btn btn-ghost">
-
-              <Menu size={24} />
-
-            </div>
-
-            <ul tabIndex="-1" className="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow">
-
-              {pageLinks}
-
-            </ul>
-
-          </div>
-
-
-
-          <div className="hidden lg:block relative w-full max-w-sm">
-
-            <input 
-
-              type="text" 
-
-              placeholder="Search products" 
-
-              className="input input-bordered w-full h-10 rounded-[2px] pr-10 focus:outline-none focus:border-gray-400" 
-
-            />
-
-            <button className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-black">
-
-              <Search size={18} strokeWidth={1.5} />
-
-            </button>
-
-          </div>
-
-        </div>
-
-
-
-        {/* Center: Logo */}
-
-        <div className="navbar-center">
-
-          <NavLink to="/" className="flex flex-col items-center">
-
-            <img 
-
-              src={navLogo} 
-
-              alt="Kunjo Jewellers" 
-
-              className="h-16 object-contain" 
-
-              onError={(e) => {
-
-                e.target.style.display = 'none';
-
-                e.target.nextSibling.style.display = 'block';
-
-              }}
-
-            />
-
-            <div className="hidden text-center">
-
-              <h1 className="text-xl font-serif text-[#d4af37] font-bold uppercase tracking-widest">Kunjo</h1>
-
-              <p className="text-[10px] uppercase tracking-widest font-semibold text-black">Jewellers</p>
-
-            </div>
-
-          </NavLink>
-
-        </div>
-
-
-
-        {/* Right: User, Wishlist, Cart */}
-
-        <div className="navbar-end gap-2 md:gap-4">
-
-          <button className="btn btn-ghost btn-circle hover:bg-transparent">
-
-            <User size={24} strokeWidth={1.5} className="text-gray-800" />
-
-          </button>
-
+    <nav className="w-full bg-white shadow-sm sticky top-0 z-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-20">
           
-
-          <button className="btn btn-ghost btn-circle hover:bg-transparent">
-
-            <div className="indicator">
-
-              <Heart size={24} strokeWidth={1.5} className="text-gray-800" />
-
-              <span className="badge indicator-item badge-sm bg-[#222222] border-none text-white font-bold w-5 h-5 rounded-full p-0">0</span>
-
-            </div>
-
-          </button>
-
-
-
-          <button className="btn btn-ghost btn-circle hover:bg-transparent">
-
-            <div className="indicator">
-
-              <ShoppingCart size={24} strokeWidth={1.5} className="text-gray-800" />
-
-              <span className="badge indicator-item badge-sm bg-[#222222] border-none text-white font-bold w-5 h-5 rounded-full p-0">0</span>
-
-            </div>
-
-          </button>
-
-        </div>
-
-      </nav>
-
-
-
-      {/* Hidden on mobile, visible on large screens */}
-
-      <nav className="navbar px-4 md:px-8 min-h-[50px] hidden lg:flex">
-
-        
-
-      
-
-
-        {/* Center: Main Page  */}
-
-        <div className="navbar-center flex-1 justify-center">
-
-          <ul className="menu menu-horizontal px-1 gap-1">
-
-            {pageLinks}
-
-          </ul>
-
-        </div>
-
-
-
-        {/* Right: Contact & Store Info */}
-
-        <div className="navbar-end w-auto gap-6 font-medium text-[14px] text-gray-700">
-
-          <div className="flex items-center gap-2 cursor-pointer hover:text-black transition-colors">
-
-            <Phone size={18} strokeWidth={1.5} /> 01716-522922
-
+          {/* Logo - Dynamically Rendered */}
+          <div className="flex-shrink-0 flex items-center">
+            <NavLink to="/" className="flex items-center group">
+              {logoUrl ? (
+                <img 
+                  src={logoUrl} 
+                  alt={currentProfile?.instituteName || "Institute Logo"} 
+                  className="h-12 w-auto object-contain transition-transform group-hover:scale-105"
+                  onError={(e) => { e.target.style.display = 'none'; }} // Fallback if image fails to load
+                />
+              ) : (
+                // Original fallback static logo if API hasn't loaded or no logo exists
+                <span className="text-4xl font-black tracking-tighter transition-transform group-hover:scale-105">
+                  <span className="text-purple-600">k</span>
+                  <span className="text-purple-600">i</span>
+                  <span className="text-cyan-500">t</span>
+                  <span className="text-cyan-500">t</span>
+                  <span className="text-orange-500">u</span>
+                  <span className="text-orange-500">u</span>
+                </span>
+              )}
+            </NavLink>
           </div>
 
-          <div className="flex items-center gap-2 cursor-pointer hover:text-black transition-colors">
-
-            <MapPin size={18} strokeWidth={1.5} /> Find Store
-
+          {/* Desktop Navigation Menu */}
+          <div className="hidden md:flex items-center space-x-2">
+            {navItems.map((item, index) => (
+              <NavLink
+                key={index}
+                to={item.href}
+                className={({ isActive }) => getLinkStyles(isActive)}
+              >
+                {item.name}
+              </NavLink>
+            ))}
           </div>
 
+          {/* Mobile menu button */}
+          <div className="md:hidden flex items-center">
+            <button
+              onClick={toggleMenu}
+              className="inline-flex items-center justify-center p-2 rounded-lg text-purple-600 hover:bg-purple-50 focus:outline-none ring-2 ring-transparent focus:ring-purple-200 transition-all"
+              aria-expanded={isOpen}
+            >
+              <span className="sr-only">Open main menu</span>
+              {isOpen ? (
+                <X className="block h-7 w-7" />
+              ) : (
+                <Menu className="block h-7 w-7" />
+              )}
+            </button>
+          </div>
         </div>
+      </div>
 
-        
+      {/* Bottom Border Accent */}
+      <div className="h-0.5 w-full bg-gradient-to-r from-purple-400 via-cyan-400 to-orange-400"></div>
 
-      </nav>
-
-
-
-    </header>
-
+      {/* Mobile Navigation Menu */}
+      {isOpen && (
+        <div className="md:hidden bg-white border-b border-gray-100 animate-in slide-in-from-top duration-300">
+          <div className="px-4 pt-2 pb-6 space-y-2">
+            {navItems.map((item, index) => (
+              <NavLink
+                key={index}
+                to={item.href}
+                className={({ isActive }) => getMobileLinkStyles(isActive)}
+                onClick={() => setIsOpen(false)}
+              >
+                {item.name}
+              </NavLink>
+            ))}
+          </div>
+        </div>
+      )}
+    </nav>
   );
-
-};
-
-
-
-export default NavigationBar;
+}

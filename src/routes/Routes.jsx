@@ -40,7 +40,7 @@ import Results from "../pages/Dashboard/Results";
 import Routine from "../pages/Dashboard/Routine";
 import Salary from "../pages/Dashboard/Salary";
 import Notices from "../pages/Dashboard/Notices";
-import Progress from "../pages/Dashboard/Progress";
+
 import Students from "../pages/Dashboard/Students";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
@@ -52,7 +52,7 @@ import Employee from "../pages/Dashboard/Employee";
 
 import EmployeeRole from "../pages/Dashboard/EmployeeRole";
 import EmployeeList from "../pages/Dashboard/EmployeeList";
-import StudentAttendance from "../pages/Dashboard/StudentAttendance";
+
 import StudentsAttendanceRecord from "../pages/Dashboard/StudentsAttendanceRecord";
 import EmployeeAttendance from "../pages/Dashboard/EmployeeAttendance";
 import StudentAttendancePage from "../pages/Dashboard/StudentAttendance";
@@ -63,6 +63,11 @@ import Grade from "../pages/Dashboard/Grade";
 import AddMarks from "../pages/Dashboard/AddMarks";
 import StudentIDCard from "../pages/Dashboard/StudentIDCard";
 import EmployeeIDCard from "../pages/Dashboard/EmployeeIDCard";
+import InstituteProfile from "../pages/Dashboard/InstituteProfile";
+import AboutUs from "../pages/AboutUs";
+import Banner from "../pages/Dashboard/Banner";
+import OurActivities from "../pages/Dashboard/OurActivities";
+
 
 
 
@@ -71,33 +76,31 @@ export const router = createBrowserRouter([
   // ==========================================
   // PUBLIC ROUTES (Website Front-End)
   // ==========================================
-  {
-    path: "/",
-    element: <Root />,
-    errorElement: <Error404 />,
-    children: [
-      {
-        path: "/login",
-        element: <Login />,
-      },
-      {
-        path: "/register",
-        element: <Register />,
-      },
-      // Navbar routes (Home Page Wrapper)
-      {
-        path: "/",
-        element: <NavHome />, // NavHome stays on the screen always
-        children: [
-          {
-            path: "/", // When the user is at the root URL
-            element: <HomePage />, // Show all the banners and sliders
-          },
-        ],
-      },
-    ],
-  },
-
+ {
+  path: "/",
+  element: <Root />,
+  errorElement: <Error404 />,
+  children: [
+    {
+      path: "/", 
+      element: <HomePage />, 
+    },
+        
+        {
+          path: "/about", // This matches "/about"
+          element: <AboutUs />, 
+        },
+   
+    {
+      path: "login",
+      element: <Login />,
+    },
+    {
+      path: "register",
+      element: <Register />,
+    },
+  ],
+},
   // ==========================================
   // PRIVATE ROUTES (Admin/School Dashboard)
   // ==========================================
@@ -109,6 +112,31 @@ export const router = createBrowserRouter([
       {
         path: "dashboard",
         element: <PrivateRoot><Home /></PrivateRoot>,
+      },
+      {
+  path: "website-management", // Parent route
+  children: [
+    {
+      path: "banner", // Maps to /website-management/banner
+      element: (
+        <PrivateRoot>
+          <Banner />
+        </PrivateRoot>
+      ),
+    },
+    {
+      path: "our-activities", 
+      element: (
+        <PrivateRoot>
+          <OurActivities />
+        </PrivateRoot>
+      ),
+    },
+  ],
+},
+      {
+        path: "/instituteProfile",
+        element : <PrivateRoot><InstituteProfile/> </PrivateRoot>
       },
       {
         path: "students",
@@ -311,10 +339,7 @@ export const router = createBrowserRouter([
     },
   ],
 },
-      {
-        path: "progress",
-        element: <PrivateRoot><Progress /></PrivateRoot>,
-      },
+     
 
       {
   path: "settings",

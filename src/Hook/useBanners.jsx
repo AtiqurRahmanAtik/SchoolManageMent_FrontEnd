@@ -1,30 +1,28 @@
 import { useState, useCallback } from "react";
-import useAuth from "./useAuth"; // Ensure you import your useAuth hook
+import useAuth from "./useAuth"; 
 
-const API = `${process.env.REACT_APP_BACKEND_URL}/employee`;
+const API = `${process.env.REACT_APP_BACKEND_URL}/banners`;
 
-
-
-export const useEmployees = () => {
-  const [employees, setEmployees] = useState([]);
-  const [employeeDetails, setEmployeeDetails] = useState(null);
+export const useBanners = () => {
+  const [banners, setBanners] = useState([]);
+  const [bannerDetails, setBannerDetails] = useState(null);
   const [pagination, setPagination] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   const { branch } = useAuth(); 
 
-  // GET: All Employees (Paginated & Searchable)
-  const fetchAllEmployees = useCallback(async (page = 1, limit = 10, search = "") => {
+  // GET: All Banners (Paginated & Searchable)
+  const fetchAllBanners = useCallback(async (page = 1, limit = 10, search = "") => {
     setLoading(true);
     setError(null);
     try {
       const response = await fetch(`${API}/?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`);
       const result = await response.json();
       
-      if (!response.ok) throw new Error(result.error || "Failed to fetch employees");
+      if (!response.ok) throw new Error(result.error || "Failed to fetch banners");
       
-      setEmployees(result.data);
+      setBanners(result.data);
       setPagination(result.pagination);
       return result;
     } catch (err) {
@@ -35,17 +33,17 @@ export const useEmployees = () => {
   }, []);
 
   
-  // GET: All Employees by Branch (Paginated & Searchable)
-  const fetchEmployeesByBranch = useCallback(async (targetBranch = branch, page = 1, limit = 10, search = "") => {
+  // GET: All Banners by Branch (Paginated & Searchable)
+  const fetchBannersByBranch = useCallback(async (targetBranch = branch, page = 1, limit = 10, search = "") => {
     setLoading(true);
     setError(null);
     try {
       const response = await fetch(`${API}/${targetBranch}/get-all?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`);
       const result = await response.json();
       
-      if (!response.ok) throw new Error(result.error || "Failed to fetch branch employees");
+      if (!response.ok) throw new Error(result.error || "Failed to fetch branch banners");
       
-      setEmployees(result.data);
+      setBanners(result.data);
       setPagination(result.pagination);
       return result;
     } catch (err) {
@@ -55,17 +53,17 @@ export const useEmployees = () => {
     }
   }, [branch]);
 
-  // GET: Single Employee Details By ID
-  const fetchEmployeeById = useCallback(async (id) => {
+  // GET: Single Banner Details By ID
+  const fetchBannerById = useCallback(async (id) => {
     setLoading(true);
     setError(null);
     try {
       const response = await fetch(`${API}/get-id/${id}`);
       const result = await response.json();
       
-      if (!response.ok) throw new Error(result.message || result.error || "Employee not found");
+      if (!response.ok) throw new Error(result.message || result.error || "Banner not found");
       
-      setEmployeeDetails(result);
+      setBannerDetails(result);
       return result;
     } catch (err) {
       setError(err.message);
@@ -74,13 +72,13 @@ export const useEmployees = () => {
     }
   }, []);
 
-  // POST: Create a new Employee
-  const createEmployee = useCallback(async (employeeData) => {
+  // POST: Create a new Banner
+  const createBanner = useCallback(async (bannerData) => {
     setLoading(true);
     setError(null);
     try {
       // Fallback to the authenticated user's branch if not provided in the form
-      const payload = { ...employeeData, branch: employeeData.branch || branch };
+      const payload = { ...bannerData, branch: bannerData.branch || branch };
       
       const response = await fetch(`${API}/post`, {
         method: "POST",
@@ -92,7 +90,7 @@ export const useEmployees = () => {
       });
       
       const result = await response.json();
-      if (!response.ok) throw new Error(result.error || "Failed to create employee");
+      if (!response.ok) throw new Error(result.error || "Failed to create banner");
       
       return result;
     } catch (err) {
@@ -103,8 +101,8 @@ export const useEmployees = () => {
     }
   }, [branch]);
 
-  // PUT: Update a Employee
-  const updateEmployee = useCallback(async (id, employeeData) => {
+  // PUT: Update a Banner
+  const updateBanner = useCallback(async (id, bannerData) => {
     setLoading(true);
     setError(null);
     try {
@@ -114,11 +112,11 @@ export const useEmployees = () => {
           "Content-Type": "application/json",
           // "Authorization": `Bearer ${token}`
         },
-        body: JSON.stringify(employeeData),
+        body: JSON.stringify(bannerData),
       });
       
       const result = await response.json();
-      if (!response.ok) throw new Error(result.message || result.error || "Failed to update employee");
+      if (!response.ok) throw new Error(result.message || result.error || "Failed to update banner");
       
       return result;
     } catch (err) {
@@ -129,8 +127,8 @@ export const useEmployees = () => {
     }
   }, []);
 
-  // DELETE: Remove a Employee
-  const removeEmployee = useCallback(async (id) => {
+  // DELETE: Remove a Banner
+  const removeBanner = useCallback(async (id) => {
     setLoading(true);
     setError(null);
     try {
@@ -140,7 +138,7 @@ export const useEmployees = () => {
       });
       
       const result = await response.json();
-      if (!response.ok) throw new Error(result.message || result.error || "Failed to delete employee");
+      if (!response.ok) throw new Error(result.message || result.error || "Failed to delete banner");
       
       return result;
     } catch (err) {
@@ -151,21 +149,19 @@ export const useEmployees = () => {
     }
   }, []);
 
-
-
   return {
-    employees,
-    employeeDetails,
+    banners,
+    bannerDetails,
     pagination,
     loading,
     error,
-    fetchAllEmployees,
-    fetchEmployeesByBranch,
-    fetchEmployeeById,
-    createEmployee,
-    updateEmployee,
-    removeEmployee,
+    fetchAllBanners,
+    fetchBannersByBranch,
+    fetchBannerById,
+    createBanner,
+    updateBanner,
+    removeBanner,
   };  
 };
 
-export default useEmployees;
+export default useBanners;
