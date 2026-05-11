@@ -47,7 +47,7 @@ import Register from "../pages/Register";
 
 import HomePage from "../pages/HomePage";
 import Error404 from "../pages/Error404";
-import NavHome from "../pages/NavHome";
+
 import Employee from "../pages/Dashboard/Employee";
 
 import EmployeeRole from "../pages/Dashboard/EmployeeRole";
