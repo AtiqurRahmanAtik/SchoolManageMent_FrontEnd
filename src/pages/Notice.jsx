@@ -23,7 +23,7 @@ const Notice = () => {
         </div>
 
         {/* Loading State */}
-        {loading && recentNotices.length === 0 && (
+        {loading && recentNotices?.length === 0 && (
           <div className="flex justify-center items-center py-20">
             <span className="loading loading-spinner loading-lg text-[#1a82c4]"></span>
           </div>
@@ -37,7 +37,7 @@ const Notice = () => {
         )}
 
         {/* Notices List Area */}
-        {!loading && !error && recentNotices && recentNotices.length > 0 && (
+        {!loading && !error && recentNotices && recentNotices?.length > 0 && (
           <div className="flex flex-col gap-4 h-[600px] overflow-y-auto pr-2 custom-scrollbar">
             {recentNotices.map((notice) => (
               <Link 
@@ -61,7 +61,7 @@ const Notice = () => {
         )}
 
         {/* Empty State */}
-        {!loading && !error && recentNotices.length === 0 && (
+        {!loading && !error && recentNotices?.length === 0 && (
           <div className="text-center text-gray-500 py-10 bg-white rounded-xl shadow-sm border border-gray-200">
             No school notices available at this time.
           </div>
