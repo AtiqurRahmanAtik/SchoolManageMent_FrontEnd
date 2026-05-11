@@ -62,8 +62,8 @@ const OurActivities = () => {
           </div>
         )}
 
-        {/* Loading State */}
-        {loading && ourActivities.length === 0 ? (
+        {/* Loading State - ADDED SAFE CHECK (!ourActivities || ourActivities.length === 0) */}
+        {loading && (!ourActivities || ourActivities.length === 0) ? (
           <div className="flex justify-center items-center h-32">
             <span className="loading loading-spinner loading-lg text-purple-600">Loading...</span>
           </div>
@@ -80,7 +80,6 @@ const OurActivities = () => {
                   {/* Hexagon Image Container */}
                   <div 
                     className={`w-24 h-24 flex items-center justify-center flex-shrink-0 text-white  overflow-hidden shadow-sm`}
-                   
                   >
                     {/* Counter-rotate the inner div so the image remains straight */}
                     <div className="w-full h-full p-1" style={{ transform: 'rotate(5deg)' }}>
@@ -112,8 +111,8 @@ const OurActivities = () => {
           </div>
         )}
 
-        {/* View All Button - Hides if loading, currently showing all, or if total items are 6 or less */}
-        {!loading && !isShowingAll && (pagination?.totalItems > 6 || ourActivities.length === 6) && (
+        {/* View All Button - ADDED OPTIONAL CHAINING (ourActivities?.length) */}
+        {!loading && !isShowingAll && (pagination?.totalItems > 6 || ourActivities?.length === 6) && (
           <div className="mt-16 text-center">
             <button 
               onClick={handleViewAll}
