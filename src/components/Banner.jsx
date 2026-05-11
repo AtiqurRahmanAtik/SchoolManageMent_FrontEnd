@@ -41,6 +41,8 @@ const Banner = () => {
     transition: 'opacity 1s ease-out, transform 1s ease-out'
   };
 
+
+  
   return (
     <div 
       className="relative w-full h-[400px] md:h-[500px] lg:h-[600px] flex items-center justify-center bg-cover bg-center transition-all duration-700"
