@@ -27,6 +27,11 @@ const useMenuItems = () => {
   icon: <MdOutlineSchool className="text-xl" />, 
   list: [
     {
+      title: "ResentNotice",
+      path: "/website-management/resentNotice", // Example of how the next one would look
+      icon: <MdOutlineSchool className="text-xl" />,
+    },
+    {
       title: "Banner",
       // FIXED: Changed from "/Banner" to match the nested route
       path: "/website-management/banner", 
@@ -37,14 +42,41 @@ const useMenuItems = () => {
       path: "/website-management/our-activities", // Example of how the next one would look
       icon: <MdOutlineSchool className="text-xl" />,
     },
+    {
+      title: "Parents Review",
+      path: "/website-management/parents-review", // Example of how the next one would look
+      icon: <MdOutlineSchool className="text-xl" />,
+    },
+    {
+      title: "Events",
+      path: "/website-management/events", // Example of how the next one would look
+      icon: <MdOutlineSchool className="text-xl" />,
+    },
+    {
+      title: "Blogs",
+      path: "/website-management/blogs", // Example of how the next one would look
+      icon: <MdOutlineSchool className="text-xl" />,
+    },
+     {
+      title: "Contact",
+      path: "/website-management/contacts", // Example of how the next one would look
+      icon: <MdOutlineSchool className="text-xl" />,
+    },
+     {
+      title: "AboutUs",
+      path: "/website-management/aboutUs", // Example of how the next one would look
+      icon: <MdOutlineSchool className="text-xl" />,
+    },
   ]
 }
 ,
 
     { title: "Institute Profile", path: "/instituteProfile", icon: <MdOutlinePeople className="text-xl" /> },
+     { title: "Admissions", path: "/admissions", icon: <MdOutlinePersonAdd className="text-xl" /> },
     { title: "Students", path: "/students", icon: <MdOutlinePeople className="text-xl" /> },
-    { title: "Admissions", path: "/admissions", icon: <MdOutlinePersonAdd className="text-xl" /> },
-    { title: "Teachers", path: "/teachers", icon: <MdOutlineSchool className="text-xl" /> },
+   
+
+    // { title: "Teachers", path: "/teachers", icon: <MdOutlineSchool className="text-xl" /> },
 
 
 {

@@ -1,10 +1,8 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import useEmployees from '../../Hook/useEmployees';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Link } from 'react-router-dom';
-import html2canvas from "html2canvas";
-import jsPDF from "jspdf";
 
 import Mtitle from '../../components library/Mtitle';
 import TableControls from '../../components/TableControls';
@@ -36,10 +34,6 @@ export default function EmployeeIDCard() {
   // View Modal States
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [viewData, setViewData] = useState(null);
-
-  // --- Refs for PDF Generation ---
-  const frontRef = useRef(null);
-  const backRef = useRef(null);
 
   // --- Dynamic Table Headers ---
   const tableHeaders = [
@@ -100,8 +94,6 @@ export default function EmployeeIDCard() {
       toast.error("Failed to fetch employee details.");
     }
   };
-
-  
 
   // Client-side filtering
   const filteredEmployees = employees?.filter((employee) => {
@@ -378,9 +370,8 @@ export default function EmployeeIDCard() {
             <div id="printable-id-card" className="flex flex-col md:flex-row items-center justify-center gap-8 py-4">
 
               {/* FRONT SIDE */}
-              <div 
-                ref={frontRef} 
-                className="w-[320px] h-[480px] shrink-0 bg-white rounded-2xl overflow-hidden shadow-2xl flex flex-col relative text-slate-800 border border-slate-200"
+              <div
+                className="w-[320px] h-[480px] shrink-0 print:scale-100 bg-white rounded-2xl overflow-hidden shadow-2xl flex flex-col relative text-slate-800 border border-slate-200"
               >
                 {/* Header Background Design */}
                 <div className="h-44 bg-slate-800 relative overflow-hidden">
@@ -452,9 +443,8 @@ export default function EmployeeIDCard() {
               </div>
 
               {/* BACK SIDE */}
-              <div 
-                ref={backRef} 
-                className="w-[320px] h-[480px] shrink-0 bg-slate-800 rounded-2xl overflow-hidden shadow-2xl flex flex-col relative text-white border border-slate-700"
+              <div
+                className="w-[320px] h-[480px] shrink-0 print:scale-100 bg-slate-800 rounded-2xl overflow-hidden shadow-2xl flex flex-col relative text-white border border-slate-700"
               >
                 <div className="p-8 flex flex-col h-full">
                   <div className="border-l-4 border-orange-500 pl-4 mb-8">
@@ -499,14 +489,29 @@ export default function EmployeeIDCard() {
           {/* Action Buttons */}
           <div className="modal-action no-print flex justify-between items-center mt-8 pt-4 border-t border-base-content/10">
             <button onClick={() => setIsViewModalOpen(false)} className="btn btn-ghost">Close</button>
-            <button 
-            
-              className="btn btn-success px-10"
+            <button
+              onClick={() => {
+                setTimeout(() => {
+                  window.print();
+                }, 300);
+              }}
+              className="btn btn-primary px-10"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5 mr-2"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
+                />
               </svg>
-              Download / Print PDF
+              Print ID Card
             </button>
           </div>
         </div>

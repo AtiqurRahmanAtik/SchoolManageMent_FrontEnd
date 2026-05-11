@@ -64,9 +64,23 @@ import AddMarks from "../pages/Dashboard/AddMarks";
 import StudentIDCard from "../pages/Dashboard/StudentIDCard";
 import EmployeeIDCard from "../pages/Dashboard/EmployeeIDCard";
 import InstituteProfile from "../pages/Dashboard/InstituteProfile";
-import AboutUs from "../pages/AboutUs";
+
 import Banner from "../pages/Dashboard/Banner";
 import OurActivities from "../pages/Dashboard/OurActivities";
+import ParentsReview from "../pages/Dashboard/ParentsReview";
+import Events from "../pages/Dashboard/Events";
+import ResentNotice from "../pages/Dashboard/ResentNotice";
+import Notice from "../pages/Notice";
+import NoticeDetails from "../pages/NoticeDetails";
+import Blog from "../pages/Blog";
+import Blogs from "../pages/Dashboard/Blogs";
+import BlogDetails from "../pages/BlogDetails";
+import Contact from "../pages/Contact";
+import Contacts from "../pages/Dashboard/Contacts";
+import Teacher from "../pages/Teacher";
+
+import About from "../pages/About";
+import AboutUs from "../pages/Dashboard/AboutUs";
 
 
 
@@ -85,12 +99,41 @@ export const router = createBrowserRouter([
       path: "/", 
       element: <HomePage />, 
     },
+    {
+      path: "/teacher",
+      element: <Teacher/>
+    },
         
         {
           path: "/about", // This matches "/about"
-          element: <AboutUs />, 
+          element: <About />, 
         },
-   
+          {
+          path: "/notice", // This matches "/about"
+          element: <Notice />, 
+        },
+         {
+          path: "/notice-details/:id", // This matches "/about"
+          element: <NoticeDetails />, 
+        },
+        {
+          path:"blog",
+          element: <Blog/>
+        },
+         {
+          path:"/blog-details/:id",
+          element: <BlogDetails/>
+        },
+        {
+          path:"contact",
+          element: <Contact/>
+        },
+          
+       
+     
+      
+          
+        
     {
       path: "login",
       element: <Login />,
@@ -117,6 +160,14 @@ export const router = createBrowserRouter([
   path: "website-management", // Parent route
   children: [
     {
+      path: "resentNotice", // Maps to /website-management/banner
+      element: (
+        <PrivateRoot>
+          <ResentNotice />
+        </PrivateRoot>
+      ),
+    },
+    {
       path: "banner", // Maps to /website-management/banner
       element: (
         <PrivateRoot>
@@ -132,6 +183,47 @@ export const router = createBrowserRouter([
         </PrivateRoot>
       ),
     },
+     {
+      path: "parents-review", 
+      element: (
+        <PrivateRoot>
+          <ParentsReview />
+        </PrivateRoot>
+      ),
+    },
+      {
+      path: "events", 
+      element: (
+        <PrivateRoot>
+          < Events/>
+        </PrivateRoot>
+      ),
+    },
+    {
+      path: "aboutUs", 
+      element: (
+        <PrivateRoot>
+          < AboutUs/>
+        </PrivateRoot>
+      ),
+    },
+    {
+      path: "blogs", 
+      element: (
+        <PrivateRoot>
+          < Blogs/>
+        </PrivateRoot>
+      ),
+    },
+    {
+      path: "contacts", 
+      element: (
+        <PrivateRoot>
+          < Contacts/>
+        </PrivateRoot>
+      ),
+    },
+    
   ],
 },
       {
@@ -139,17 +231,18 @@ export const router = createBrowserRouter([
         element : <PrivateRoot><InstituteProfile/> </PrivateRoot>
       },
       {
-        path: "students",
-        element: <PrivateRoot><Students /></PrivateRoot>,
-      },
-      {
         path: "admissions",
         element: <PrivateRoot><Admissions /></PrivateRoot>,
       },
       {
-        path: "teachers",
-        element: <PrivateRoot><Teachers /></PrivateRoot>,
+        path: "students",
+        element: <PrivateRoot><Students /></PrivateRoot>,
       },
+      
+      // {
+      //   path: "teachers",
+      //   element: <PrivateRoot><Teachers /></PrivateRoot>,
+      // },
 
      
 

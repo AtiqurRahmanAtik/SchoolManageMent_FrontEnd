@@ -3,6 +3,9 @@ import { Outlet } from 'react-router-dom';
 import Banner from '../components/Banner';
 import OurActivities from '../components/OurActivities';
 import OurTeachers from '../components/OurTeachers';
+import ParentsReview from '../components/ParentsReview';
+import Events from '../components/Events';
+import RecentNotice from '../components/RecentNotice';
 
 const HomePage = () => {
   return (
@@ -14,9 +17,12 @@ const HomePage = () => {
       */}
       
       {/* This Outlet is where child routes like <AboutUs /> will appear */}
+      <RecentNotice/>
       <Banner/>
       <OurActivities/>
       <OurTeachers/>
+      <ParentsReview/>
+      <Events/>
 
 
 

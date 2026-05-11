@@ -27,9 +27,9 @@ export default function NavigationBar() {
   const navItems = [
     { name: 'HOME', href: '/' },
     { name: 'ABOUT US', href: '/about' },
-    { name: 'TEACHER', href: '/teacher' },
-    { name: 'CLASSES', href: '/classes' },
-    { name: 'PAGES', href: '/pages' },
+    { name: 'TEACHERS', href: '/teacher' },
+    // { name: 'CLASSES', href: '/classes' },
+    { name: 'NOTICE', href: '/notice' },
     { name: 'BLOG', href: '/blog' },
     { name: 'CONTACT', href: '/contact' },
   ];
