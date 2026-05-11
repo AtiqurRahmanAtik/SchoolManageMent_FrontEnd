@@ -63,7 +63,7 @@ const OurActivities = () => {
         )}
 
         {/* Loading State - ADDED SAFE CHECK (!ourActivities || ourActivities.length === 0) */}
-        {loading && (!ourActivities || ourActivities.length === 0) ? (
+        {loading && (!ourActivities || ourActivities?.length === 0) ? (
           <div className="flex justify-center items-center h-32">
             <span className="loading loading-spinner loading-lg text-purple-600">Loading...</span>
           </div>
@@ -72,7 +72,7 @@ const OurActivities = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
             {ourActivities?.map((activity, index) => {
               // Get color theme based on index to maintain UI pattern
-              const theme = themeColors[index % themeColors.length];
+              const theme = themeColors[index % themeColors?.length];
 
               return (
                 <div key={activity._id} className="flex gap-5 items-start">
