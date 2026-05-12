@@ -24,12 +24,12 @@ import Home from "../pages/Dashboard/Home"; // Main Dashboard view
 
 
 
-import Teachers from "../pages/Dashboard/Teachers";
+
 import Section from "../pages/Dashboard/Section";
 import Classes from "../pages/Dashboard/Classes";
 import Admissions from "../pages/Dashboard/Admissions";
-import AttendanceReport from "../pages/Dashboard/AttendanceReport";
-import Attendance from "../pages/Dashboard/Attendance";
+
+
 import Calendar from "../pages/Dashboard/Calendar";
 
 import Subjects from "../pages/Dashboard/Subjects";

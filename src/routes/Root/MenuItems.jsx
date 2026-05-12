@@ -3,18 +3,18 @@ import {
   MdOutlinePeople,
   MdOutlinePersonAdd,
   MdOutlineSchool,
-  MdOutlineBadge,
+
   MdOutlineClass,
   MdOutlineMenuBook,
   MdOutlineFactCheck,
-  MdOutlineAssessment,
+ 
   MdOutlineEditNote,
   MdOutlineEmojiEvents,
   MdOutlineSchedule,
   MdOutlinePayments,
   MdOutlineNotifications,
   MdOutlineCalendarMonth,
-  MdOutlineTrendingUp,
+ 
   MdLogout
 } from "react-icons/md";
 
