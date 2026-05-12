@@ -4,11 +4,13 @@ import useAuth from "./useAuth";
 const API = `${process.env.REACT_APP_BACKEND_URL}/our-activities`;
 
 export const useOurActivities = () => {
+
   const [ourActivities, setOurActivities] = useState([]);
   const [ourActivityDetails, setOurActivityDetails] = useState(null);
   const [pagination, setPagination] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  
 
   const { branch } = useAuth(); 
 

@@ -20,6 +20,9 @@ import {
 
 const useMenuItems = () => {
   const allItems = [
+    { title: "HomePage", path: "/", icon: <MdDashboard className="text-xl" /> },
+
+
     { title: "Dashboard", path: "/dashboard", icon: <MdDashboard className="text-xl" /> },
 
     { 

@@ -153,6 +153,10 @@ export const router = createBrowserRouter([
     errorElement: <Error404 />,
     children: [
       {
+        path: "/",
+        element: <PrivateRoot><Home /></PrivateRoot>,
+      },
+      {
         path: "dashboard",
         element: <PrivateRoot><Home /></PrivateRoot>,
       },

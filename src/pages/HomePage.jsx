@@ -4,8 +4,9 @@ import Banner from '../components/Banner';
 import OurActivities from '../components/OurActivities';
 import OurTeachers from '../components/OurTeachers';
 import ParentsReview from '../components/ParentsReview';
-import Events from '../components/Events';
+
 import RecentNotice from '../components/RecentNotice';
+import Event from '../components/Event';
 
 const HomePage = () => {
   return (
@@ -22,7 +23,7 @@ const HomePage = () => {
       <OurActivities/>
       <OurTeachers/>
       <ParentsReview/>
-      <Events/>
+      <Event/>
 
 
 

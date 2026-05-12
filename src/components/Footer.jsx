@@ -1,5 +1,6 @@
 import React from 'react';
 import { MapPin, Phone, Mail, Globe, Facebook, Twitter, Youtube, Instagram, Send } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -57,6 +58,8 @@ const Footer = () => {
                   <span className="text-purple-400">›</span> {link}
                 </a>
               ))}
+
+             <Link to={"/login"}> <button className="btn text-[#8e24aa] btn-link">Login</button></Link>
             </div>
           </div>
 

@@ -5,6 +5,7 @@ const axiosPublic = axios.create({
   baseURL: `${process.env.REACT_APP_BACKEND_URL}/api`,
 });
 
+
 const useAxiosPublic = () => {
   return axiosPublic;
 };

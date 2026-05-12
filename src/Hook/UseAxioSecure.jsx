@@ -3,8 +3,9 @@ import { AuthContext } from "../providers/AuthProvider";
 import { useContext } from "react";
 
 const axiosSecure = axios.create({
-  baseURL: `${process.env.REACT_APP_BACKEND_URL}/api`,
+  baseURL: `${process.env.REACT_APP_BACKEND_URL}`,
 });
+
 
 const UseAxiosSecure = () => {
   const { user, branch,clientIP } = useContext(AuthContext);

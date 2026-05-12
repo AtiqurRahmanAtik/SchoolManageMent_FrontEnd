@@ -2,13 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { useBanners } from '../Hook/useBanners'; // Adjust the import path as necessary
 
 const Banner = () => {
-  const { banners, fetchBannersByBranch, loading } = useBanners();
+  // Replaced fetchBannersByBranch with fetchAllBanners
+  const { banners, fetchAllBanners, loading } = useBanners();
   const [animate, setAnimate] = useState(false);
 
   // Fetch banner data on component mount
   useEffect(() => {
-    fetchBannersByBranch();
-  }, [fetchBannersByBranch]);
+    fetchAllBanners();
+  }, [fetchAllBanners]);
 
   // Trigger text animation when banner data is loaded
   useEffect(() => {
@@ -41,8 +42,6 @@ const Banner = () => {
     transition: 'opacity 1s ease-out, transform 1s ease-out'
   };
 
-
-  
   return (
     <div 
       className="relative w-full h-[400px] md:h-[500px] lg:h-[600px] flex items-center justify-center bg-cover bg-center transition-all duration-700"
@@ -77,7 +76,6 @@ const Banner = () => {
           <button className="bg-purple-800 hover:bg-purple-900 text-white font-semibold py-3 px-8 text-sm md:text-base uppercase tracking-wider transition duration-300 shadow-md transform hover:scale-105">
             Contact Us Now
           </button>
-        
         </div>
         
       </div>

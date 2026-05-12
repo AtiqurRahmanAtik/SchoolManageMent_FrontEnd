@@ -2,13 +2,12 @@ import React, { useState } from 'react';
 import { Link, useLocation } from "react-router-dom";
 import { MdChevronRight } from "react-icons/md";
 import useMenuItems from "./MenuItems"; // Ensure correct import path
+// import useAuth from "../../Hook/useAuth"; // Un-comment this when ready to use real context
 
-// 💡 Import both logo versions
 import Logo from "../../assets/Logo/logo.png";
 import Logo_Dark from "../../assets/Logo/logo_dark.png"; 
 
-
-const AccordionItem = ({ item, isSidebarOpen, mode }) => {
+const AccordionItem = ({ item, isSidebarOpen, mode, logoutUser, loading }) => {
     const [isOpen, setIsOpen] = useState(false);
     const location = useLocation();
 
@@ -82,6 +81,24 @@ const AccordionItem = ({ item, isSidebarOpen, mode }) => {
     // --- RECURSIVE LOGIC END ---
 
     else {
+        // Capture Logout Button specifically
+        if (item.title === "Logout") {
+            return (
+                <li className="my-2">
+                    <button
+                        onClick={logoutUser}
+                        disabled={loading}
+                        className={`w-full flex p-3 rounded-xl shadow-sm transition-all items-center gap-3 relative overflow-hidden bg-white text-gray-700 hover:bg-orange-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700`}
+                    >
+                        <div className="ml-1 text-primary dark:text-gray-300">
+                            {item.icon}
+                        </div>
+                        {isSidebarOpen && <span className="font-semibold text-sm">{loading ? "Logging Out..." : item.title}</span>}
+                    </button>
+                </li>
+            );
+        }
+
         // Flat Links (No children)
         const isActive = location.pathname === item.path;
         
@@ -111,6 +128,49 @@ const AccordionItem = ({ item, isSidebarOpen, mode }) => {
 const Sidebar = ({ isSidebarOpen, toggleSidebar, mode }) => {
     // Get menu items
     const menuItems = useMenuItems();
+    const [loading, setLoading] = useState(false);
+
+    // Make sure to uncomment your useAuth below if you manage user state there:
+    // const { user, setUser, setBranch } = useAuth(); 
+
+    // Using dummy objects in case you don't import useAuth directly here.
+    // Replace these dummy calls with your real context states.
+    const user = { email: "user@example.com", branch: "default" }; 
+    const setUser = (val) => console.log("SetUser called:", val);
+    const setBranch = (val) => console.log("SetBranch called:", val);
+
+    const logoutUser = async () => {
+        setLoading(true);
+        try {
+            // Replaced axiosSecure with native fetch as requested
+            const API = process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"; 
+            await fetch(`${API}/user/logout`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    // "Authorization": `Bearer ${localStorage.getItem("authToken")}` // uncomment if API requires auth token
+                },
+                body: JSON.stringify({ email: user?.email })
+            });
+            
+            setUser(null);
+            setBranch("teaxo"); // Reset to default
+
+            // 1. Fully clear all storage to kill cached data
+            localStorage.clear();
+            sessionStorage.clear();
+
+            // 2. Force a hard refresh to the home page to wipe React memory
+            window.location.href = "/";
+            
+        } catch (error) {
+            // Handled silently per request
+            console.error("Logout failed", error);
+        } finally {
+            // Setting loading to false isn't strictly necessary if page refreshes, but good practice
+            setLoading(false); 
+        }
+    };
     
     // Using your 'secondary' background color for the main sidebar
     const sidebarClasses = `
@@ -165,6 +225,8 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, mode }) => {
                                 item={item} 
                                 isSidebarOpen={isSidebarOpen} 
                                 mode={mode} 
+                                logoutUser={logoutUser}
+                                loading={loading}
                             />
                         ))}
                     </ul>
