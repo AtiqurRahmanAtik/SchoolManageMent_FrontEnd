@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 import useAuth from "./useAuth"; 
 
-const API = `${process.env.REACT_APP_BACKEND_URL}/api/our-activities`;
+const API = `${process.env.REACT_APP_BACKEND_URL}/our-activities`;
 
 export const useOurActivities = () => {
   const [ourActivities, setOurActivities] = useState([]);

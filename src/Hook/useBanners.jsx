@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 import useAuth from "./useAuth"; 
 
-const API = `${process.env.REACT_APP_BACKEND_URL}/api/banners`;
+const API = `${process.env.REACT_APP_BACKEND_URL}api/banners`;
 
 export const useBanners = () => {
   const [banners, setBanners] = useState([]);
