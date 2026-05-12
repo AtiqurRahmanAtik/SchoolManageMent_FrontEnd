@@ -136,7 +136,9 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, mode }) => {
     // Using dummy objects in case you don't import useAuth directly here.
     // Replace these dummy calls with your real context states.
     const user = { email: "user@example.com", branch: "default" }; 
-    const setUser = (val) => console.log("SetUser called:", val);
+    const setUser = (val) => 
+        console.log("SetUser called:", val)
+    ;
     const setBranch = (val) => console.log("SetBranch called:", val);
 
     const logoutUser = async () => {
